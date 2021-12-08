@@ -12,7 +12,7 @@ def color_opponent():
     return BLACK
 
 
-def check_bqueen(board):
+def check_bqueen(board):  # проверка есть ли белые шашки расположенные на линии дамок
     sp = []
     for i in range(1, 8, 2):
         b = board[0][i]
@@ -131,7 +131,7 @@ class Board:
         self.cell_size = 50
         self.mouse_coords = []
 
-    # настройка внешнего вида
+    # настройка внешнего вида  (пока не тестировалось)
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
@@ -163,18 +163,6 @@ class Board:
                     if self.field[i][j].__class__.__name__ == 'Queen':
                         pygame.draw.circle(screen, WHITE if self.field[i][j].color == BLACK else BLACK, (
                         self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)), self.cell_size // 4, 4)
-
-    def cell(self, y, x):
-        if self.field[y][x] == None:
-            return '  '
-        elif self.field[y][x].__class__.__name__ == 'Usual':
-            if self.field[y][x].color == WHITE:
-                return 'wU'
-            return 'bU'
-        else:
-            if self.field[y][x].color == WHITE:
-                return 'wQ'
-            return 'bQ'
 
     def move(self, x, y, pos_att):
         if len(pos_att) < 1: return False
@@ -249,7 +237,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 board.get_click(event.pos)
-            elif event.button == 3:
+            if event.button == 3:  # возникает ошибка в том, что несколько раз записываются координаты при одном нажатии
                 board.mouse_coords.append(board.get_cell(event.pos))
             print(board.mouse_coords)
 
