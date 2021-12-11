@@ -155,7 +155,7 @@ class Board:
                     color = '#f5f5dc' if j % 2 else '#964b00'
                 else:
                     color = '#f5f5dc' if j % 2 == 0 else '#964b00'
-                pygame.draw.rect(screen, pygame.Color(color),
+                screen.fill(pygame.Color(color),
                                  (self.left + self.cell_size * j, self.top + self.cell_size * i, self.cell_size, self.cell_size), 0)
                 if self.field[i][j]:
                     pygame.draw.circle(screen, self.field[i][j].color,
@@ -163,6 +163,20 @@ class Board:
                     if self.field[i][j].__class__.__name__ == 'Queen':
                         pygame.draw.circle(screen, WHITE if self.field[i][j].color == BLACK else BLACK, (
                         self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)), self.cell_size // 4, 4)
+        if self.mouse_coords:
+            x, y = self.mouse_coords[0]
+            if self.field[y][x]:
+                if self.field[y][x].color == COLOR:
+                    screen.fill('blue', (self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
+                    pygame.draw.circle(screen, COLOR,
+                                       (self.left + self.cell_size * (x + 0.5), self.top + self.cell_size * (y + 0.5)),
+                                       self.cell_size // 2 - 2)
+                    for i in range(self.height):
+                        for j in range(self.width):
+                            if self.field[y][x].can_move(self.field, x, y, ([j, i], )):
+                                screen.fill('green',
+                                                 (self.left + self.cell_size * j, self.top + self.cell_size * i,
+                                                  self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att):
         if len(pos_att) < 1: return False
@@ -244,4 +258,3 @@ while running:
     screen.fill((0, 0, 0))
     board.render(screen)
     pygame.display.flip()
-
