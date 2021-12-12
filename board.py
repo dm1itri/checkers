@@ -1,6 +1,5 @@
 import pygame
 
-
 WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
@@ -71,10 +70,11 @@ class Queen(Shapes):
 
 class Usual(Shapes):
     def can_move(self, board, x, y, pos_att):
-        if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1 and len(pos_att) == 1 and self.color == WHITE:
+        if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1 and len(
+                pos_att) == 1 and self.color == WHITE:
             if board[pos_att[0][1]][pos_att[0][0]] == None: return 1
 
-        elif (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y - 1 \
+        elif (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y - 1\
                 and len(pos_att) == 1 and self.color == BLACK:
             if board[pos_att[0][1]][pos_att[0][0]] == None: return 1
 
@@ -138,12 +138,15 @@ class Board:
         self.cell_size = cell_size
 
     def render(self, screen):
-        screen.fill('#ac9362', (self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
+        screen.fill('#ac9362', (
+        self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
         font = pygame.font.Font(None, 35)
         text = font.render(f"Ходит {'белый ' if COLOR == WHITE else 'чёрный'} игрок", True, (255, 255, 255))
         screen.blit(text, (130, 10))
         font = pygame.font.Font(None, 17)
-        text = font.render(f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H", True, (0, 0, 0))
+        text = font.render(
+            f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
+            True, (0, 0, 0))
         screen.blit(text, (self.left + self.cell_size / 2, 40))
         for i in range(1, 9):
             text = font.render(str(i), True, (0, 0, 0))
@@ -156,27 +159,31 @@ class Board:
                 else:
                     color = '#f5f5dc' if j % 2 == 0 else '#964b00'
                 screen.fill(pygame.Color(color),
-                                 (self.left + self.cell_size * j, self.top + self.cell_size * i, self.cell_size, self.cell_size), 0)
+                            (self.left + self.cell_size * j, self.top + self.cell_size * i, self.cell_size,
+                             self.cell_size), 0)
                 if self.field[i][j]:
                     pygame.draw.circle(screen, self.field[i][j].color,
-                                       (self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)), self.cell_size // 2 - 2)
+                                       (self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)),
+                                       self.cell_size // 2 - 2)
                     if self.field[i][j].__class__.__name__ == 'Queen':
                         pygame.draw.circle(screen, WHITE if self.field[i][j].color == BLACK else BLACK, (
-                        self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)), self.cell_size // 4, 4)
+                            self.left + self.cell_size * (j + 0.5), self.top + self.cell_size * (i + 0.5)),
+                                           self.cell_size // 4, 4)
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
             if self.field[y][x]:
                 if self.field[y][x].color == COLOR:
-                    screen.fill('blue', (self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
+                    screen.fill('blue', (
+                    self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
                     pygame.draw.circle(screen, COLOR,
                                        (self.left + self.cell_size * (x + 0.5), self.top + self.cell_size * (y + 0.5)),
                                        self.cell_size // 2 - 2)
                     for i in range(self.height):
                         for j in range(self.width):
-                            if self.field[y][x].can_move(self.field, x, y, ([j, i], )):
+                            if self.field[y][x].can_move(self.field, x, y, ([j, i],)):
                                 screen.fill('green',
-                                                 (self.left + self.cell_size * j, self.top + self.cell_size * i,
-                                                  self.cell_size, self.cell_size))
+                                            (self.left + self.cell_size * j, self.top + self.cell_size * i,
+                                             self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att):
         if len(pos_att) < 1: return False
@@ -210,11 +217,11 @@ class Board:
 
     def get_cell(self, mouse_pos):
         x, y = mouse_pos[0], mouse_pos[1]
-        if self.left <= x <= self.left + self.width * self.cell_size and \
+        if self.left <= x <= self.left + self.width * self.cell_size and\
                 self.top <= y <= self.top + self.height * self.cell_size:
             for i in range(self.height):
                 for j in range(self.width):
-                    if self.left + self.cell_size * j <= x <= self.left + self.cell_size * (j + 1) and \
+                    if self.left + self.cell_size * j <= x <= self.left + self.cell_size * (j + 1) and\
                             self.top + self.cell_size * i <= y <= self.top + self.cell_size * (i + 1):
                         return j, i
         else:
@@ -223,13 +230,17 @@ class Board:
     def on_click(self, cell_coords):
         global COLOR
         if cell_coords is not None:
-            if self.mouse_coords == []:
-                self.mouse_coords = [cell_coords]
-            elif len(self.mouse_coords) >= 1:
+            if len(self.mouse_coords) >= 1:
+                # если второй раз нажимаешь на одну и ту же клетку
+                if len(self.mouse_coords) == 1 and self.mouse_coords[-1] == cell_coords:
+                    self.mouse_coords = []
+                    return
                 self.mouse_coords.append(cell_coords)
                 if board.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:]):
                     COLOR = color_opponent()
                 self.mouse_coords = []
+            if self.mouse_coords == []:
+                self.mouse_coords = [cell_coords]
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
