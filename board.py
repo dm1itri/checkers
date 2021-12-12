@@ -222,13 +222,14 @@ class Board:
 
     def on_click(self, cell_coords):
         global COLOR
-        if self.mouse_coords == []:
-            self.mouse_coords = [cell_coords]
-        elif len(self.mouse_coords) >= 1:
-            self.mouse_coords.append(cell_coords)
-            if board.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:]):
-                COLOR = color_opponent()
-            self.mouse_coords = []
+        if cell_coords is not None:
+            if self.mouse_coords == []:
+                self.mouse_coords = [cell_coords]
+            elif len(self.mouse_coords) >= 1:
+                self.mouse_coords.append(cell_coords)
+                if board.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:]):
+                    COLOR = color_opponent()
+                self.mouse_coords = []
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
