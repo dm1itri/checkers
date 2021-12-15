@@ -206,15 +206,15 @@ class Board:
                 if self.field[y][x].color == COLOR:
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
-                    # pygame.draw.circle(screen, COLOR,
-                    #                    (self.left + self.cell_size * (x + 0.5), self.top + self.cell_size * (y + 0.5)),
-                    #                    self.cell_size // 2 - 2)
+
                     for i in range(self.height):
                         for j in range(self.width):
                             if self.field[y][x].can_move(self.field, x, y, ([j, i],)):
                                 screen.fill('green',
                                             (self.left + self.cell_size * j, self.top + self.cell_size * i,
                                              self.cell_size, self.cell_size))
+
+
 
     def move(self, x, y, pos_att):
         if len(pos_att) < 1: return False
@@ -234,14 +234,17 @@ class Board:
         elif len(rez) == len(pos_att):  # при атаке должно совпадать кол-во убранных шашек с кол-вом позиций атак
             self.field[pos_att[-1][1]][pos_att[-1][0]], self.field[y][x] = self.field[y][x], None
             for i, j in rez:
+                self.field[j][i].kill()
                 self.field[j][i] = None
         else:
             return False
         sp_bq = check_bqueen(self.field)
         sp_wq = check_wqueen(self.field)
         for i in sp_wq:
+            self.field[7][i].kill()
             self.field[7][i] = Queen(all_sprites, WHITE)
         for i in sp_bq:
+            self.field[0][i].kill()
             self.field[0][i] = Queen(all_sprites, BLACK)
             print(2)
         return True
