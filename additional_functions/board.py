@@ -70,6 +70,10 @@ class Shapes(pygame.sprite.Sprite):
 
 
 class Queen(Shapes):
+    def __init__(self, group, color):
+        super().__init__(group, color)
+        self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
+
     def can_move(self, board, x, y, pos_att):
         sp_kill = []
         for i, j in pos_att:
@@ -167,7 +171,7 @@ class Board:
         # значения по умолчанию
         self.left = 10
         self.top = 10
-        self.cell_size = 50
+        self.cell_size = 70
         self.mouse_coords = []
 
     # настройка внешнего вида  (пока не тестировалось)
@@ -205,8 +209,8 @@ class Board:
                     checker.rect.x = self.left + self.cell_size * j
                     checker.rect.y = self.top + self.cell_size * i
 
-                    if self.field[i][j].__class__.__name__ == 'Queen':
-                        checker.image = load_image("white_queen.png" if checker.color == WHITE else "black_queen.png")
+                    # if self.field[i][j].__class__.__name__ == 'Queen':
+                    #     checker.image = load_image("white_queen.png" if checker.color == WHITE else "black_queen.png")
 
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
@@ -299,13 +303,13 @@ class Board:
         if cell_coords is not None:
             if len(self.mouse_coords) >= 1:
                 # если второй раз нажимаешь на одну и ту же клетку
-                if  self.mouse_coords[-1] == cell_coords:
+                if len(self.mouse_coords) == 1 and self.mouse_coords[-1] == cell_coords:
                     self.mouse_coords = []
                     return
                 self.mouse_coords.append(cell_coords)
                 if board.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:]):
                     COLOR = color_opponent()
-                    self.mouse_coords = []
+                self.mouse_coords = []
             else:
                 self.mouse_coords = [cell_coords]
 
@@ -330,19 +334,41 @@ board.render(screen)
 all_sprites.draw(screen)
 pygame.display.flip()
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                board.get_click(event.pos)
-            elif event.button == 3:
-                board.mouse_coords.append(board.get_cell(event.pos))
-            print(board.mouse_coords)
 
-            screen.fill((0, 0, 0))
-            board.render(screen)
-            all_sprites.draw(screen)
-            pygame.display.flip()
+def run():
+    global screen, all_sprites, board, clock
+    pygame.init()
+    size = 500, 500
+    # screen — холст, на котором нужно рисовать:
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Шашки')
+    clock = pygame.time.Clock()
+    all_sprites = pygame.sprite.Group()
+
+    board = Board(8, 8)
+    board.set_view(50, 50, 50)
+
+    screen.fill((0, 0, 0))
+    board.render(screen)
+    all_sprites.draw(screen)
+    pygame.display.flip()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    board.get_click(event.pos)
+                elif event.button == 3:
+                    board.mouse_coords.append(board.get_cell(event.pos))
+                print(board.mouse_coords)
+
+        screen.fill((0, 0, 0))
+        board.render(screen)
+        all_sprites.draw(screen)
+        pygame.display.flip()
+
+
+if __name__ == '__main__':
+    run()
