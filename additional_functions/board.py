@@ -4,6 +4,8 @@ from additional_functions.load_image import load_image
 WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
+COUNT_WHITE_KILLED = 0
+COUNT_BLACK_KILLED = 0
 
 
 def color_opponent():
@@ -181,11 +183,24 @@ class Board:
         self.cell_size = cell_size
 
     def render(self, screen):
-        screen.fill('#ac9362', (
-            self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
-        font = pygame.font.Font(None, 35)
-        text = font.render(f"Ходит {'белый ' if COLOR == WHITE else 'чёрный'} игрок", True, (255, 255, 255))
+        screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
+        screen.fill('#ac9362', (self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
+        font = pygame.font.Font(None, 40)
+        # text = font.render(f"Ходит {'белый ' if COLOR == WHITE else 'чёрный'} игрок", True, (255, 255, 255))
+        # screen.blit(text, (130, 10))
+
+        text = font.render(f"Ходит               игрок", True, '#964b00')
         screen.blit(text, (130, 10))
+        text = font.render(f"{'белый' if COLOR == WHITE else 'чёрный'}", True, (255, 255, 255) if COLOR == WHITE else (0, 0, 0,))
+        screen.blit(text, (225, 10))
+
+        text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
+        screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5, self.top + self.cell_size * self.height + 10))
+        text = font.render(":", True, '#964b00')
+        screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - 1, self.top + self.cell_size * self.height + 10))
+        text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
+        screen.blit(text, (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
+
         font = pygame.font.Font(None, 17)
         text = font.render(
             f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
@@ -227,6 +242,7 @@ class Board:
                                              self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att):
+        global COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
         if len(pos_att) < 1:
             return False
         for i, j in pos_att:
@@ -261,6 +277,10 @@ class Board:
                 self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
+            if COLOR == BLACK:
+                COUNT_WHITE_KILLED += len(rez)
+            else:
+                COUNT_BLACK_KILLED += len(rez)
         else:
             return False
         sp_bq = check_bqueen(self.field)
@@ -271,7 +291,8 @@ class Board:
         for i in sp_bq:
             self.field[0][i].kill()
             self.field[0][i] = Queen(all_sprites, BLACK)
-            print(2)
+
+        print(COUNT_BLACK_KILLED, COUNT_WHITE_KILLED)
         return True
 
     def animation(self, checker, x, y, x1, y1):
