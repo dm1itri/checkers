@@ -3,6 +3,13 @@ import pygame
 from additional_functions.button import Button
 from additional_functions.board import run
 from additional_functions.settings import settings_run
+from additional_functions.particle import create_particles, part_group
+import sys
+
+
+def terminate():
+    pygame.quit()
+    sys.exit()
 
 
 class Menu:
@@ -13,6 +20,7 @@ class Menu:
     def run(self):
         pygame.init()
         size = width, height = 700, 500
+        fps = 60
         # screen — холст, на котором нужно рисовать:
         screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Меню')
@@ -31,6 +39,7 @@ class Menu:
             btn = Button(200, 100 * i, 70, 300, text, '#a04c0b', screen, buttons_group)
             buttons[btn] = texts[i - 1]
 
+        clock = pygame.time.Clock()
         running = True
         while running:
             size = width, height = 700, 500
@@ -40,6 +49,7 @@ class Menu:
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    create_particles(event.pos)
                     if event.button == 1:
                         for but in buttons:
                             if but.onclick(event.pos):
@@ -55,8 +65,11 @@ class Menu:
             screen.blit(main_text, (width // 2 - (main_text.get_size()[0] // 2), 20))
             buttons_group.draw(screen)
             buttons_group.update()
+            part_group.draw(screen)
+            part_group.update()
 
             pygame.display.flip()
+            clock.tick(fps)
 
     def text(self, font, size, text, color):
         font = pygame.font.Font(font, size)

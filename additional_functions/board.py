@@ -1,9 +1,28 @@
 import pygame
 from additional_functions.load_image import load_image
+import sys
 
 WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
+main_font = None
+
+
+# def load_board(filename):
+#     filename = "data/" + filename
+#     # читаем уровень, убирая символы перевода строки
+#     try:
+#         with open(filename, 'r') as mapFile:
+#             level_map = [line.strip() for line in mapFile]
+#     except FileNotFoundError:
+#         print(f'Файл {filename} не найден')
+#         return False
+#     # и подсчитываем максимальную длину
+#     max_width = max(map(len, level_map))
+#
+#     # дополняем каждую строку пустыми клетками ('.')
+#     maps = list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
+#     return maps
 
 
 def color_opponent():
@@ -183,7 +202,7 @@ class Board:
     def render(self, screen):
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
-        font = pygame.font.Font(None, 35)
+        font = pygame.font.Font(main_font, 35)
         text = font.render(f"Ходит {'белый ' if COLOR == WHITE else 'чёрный'} игрок", True, (255, 255, 255))
         screen.blit(text, (130, 10))
         font = pygame.font.Font(None, 17)
@@ -319,20 +338,12 @@ class Board:
 
 
 pygame.init()
-size = 500, 500
+size = None
 # screen — холст, на котором нужно рисовать:
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Шашки')
+screen = None
 clock = pygame.time.Clock()
 all_sprites = pygame.sprite.Group()
-
-board = Board(8, 8)
-board.set_view(50, 50, 50)
-
-screen.fill((0, 0, 0))
-board.render(screen)
-all_sprites.draw(screen)
-pygame.display.flip()
+board = None
 
 
 def run():
