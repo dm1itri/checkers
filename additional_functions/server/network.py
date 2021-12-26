@@ -8,21 +8,27 @@ class Network:
         self.server = '192.168.0.3'
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.p = self.connect()
-
-    def getP(self):
-        return self.p
+    #     self.first_connect = self.connect()
+    #
+    # def first_connect(self):
+    #     return self.p
 
     def connect(self):
         try:
             self.client.connect(self.addr)
             return self.client.recv(2048).decode()
-        except:
-            pass
+        except socket.error as e:
+            print(e)
 
     def send(self, data):
         try:
             self.client.send(data.encode())
+            return self.client.recv(2048).decode()
+        except socket.error as e:
+            print(e)
+
+    def load(self):
+        try:
             return self.client.recv(2048).decode()
         except socket.error as e:
             print(e)
