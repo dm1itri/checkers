@@ -27,10 +27,14 @@ def search_game_run():
         pygame.display.flip()
 
         count_fps += 1
-        if count_fps % 5:
-            data = network.connect()
-            if data:
-                return data, network
+        if count_fps % 50:
+            network.connect()
+            color = network.send('first_connect')
+            data = network.send('get_board')
+            is_ready = int(network.send('is_ready'))
+            print(is_ready, 'is_ready')
+            if is_ready and data:
+                return data, network, color
 
 
 if __name__ == '__main__':

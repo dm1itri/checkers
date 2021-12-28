@@ -1,10 +1,12 @@
 import pygame
 from additional_functions.load_image import load_image
 import sys
+import copy
 
 WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
+MY_COLOR = WHITE
 main_font = None
 
 
@@ -199,11 +201,12 @@ class Board:
         self.top = top
         self.cell_size = cell_size
 
-    def render(self, screen):
+    def render(self, screen, my_color):
+        self.my_color = my_color
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
         font = pygame.font.Font(main_font, 35)
-        text = font.render(f"Ходит {'белый ' if COLOR == WHITE else 'чёрный'} игрок", True, (255, 255, 255))
+        text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
         screen.blit(text, (130, 10))
         font = pygame.font.Font(None, 17)
         text = font.render(
@@ -301,7 +304,7 @@ class Board:
         for i in range(10):
             checker.rect.x += delta_x
             checker.rect.y += delta_y
-            self.render(screen)
+            self.render(screen, self.my_color)
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
@@ -343,9 +346,9 @@ class Board:
         self.on_click(cell)
 
 
-def load_board(data, board, group):
+def load_board(data, board: Board, group):
     data = data.split('%')
-
+    last_field_board = board.field.copy()
     for i in range(len(board.field)):
         string = board.field[i]
         for j in range(len(string)):
@@ -359,7 +362,7 @@ def load_board(data, board, group):
                 board.field[i][j] = Queen(group, 'white')
             elif data[i][j] == 'B':
                 board.field[i][j] = Queen(group, 'black')
-    return board
+    return last_field_board
 
 
 def send_board(board):
@@ -392,8 +395,8 @@ all_sprites = pygame.sprite.Group()
 board = None
 
 
-def run(board, network):
-    global screen, all_sprites, clock
+def online_run(board, network, MY_COLOR):
+    global screen, all_sprites, clock, COLOR
     pygame.init()
     size = 500, 500
     # screen — холст, на котором нужно рисовать:
@@ -402,14 +405,12 @@ def run(board, network):
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
 
-
     board = board
     board.set_view(50, 50, 50)
     board.load_sprites(all_sprites)
-    network.send(send_board(board))
 
     screen.fill((0, 0, 0))
-    board.render(screen)
+    board.render(screen, MY_COLOR)
     all_sprites.draw(screen)
     pygame.display.flip()
     running = True
@@ -419,7 +420,7 @@ def run(board, network):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if COLOR == WHITE:
+                if COLOR == MY_COLOR:
                     if event.button == 1:
                         board.get_click(event.pos)
                         network.send(send_board(board))
@@ -428,22 +429,24 @@ def run(board, network):
                 print(board.mouse_coords)
 
         count_fps += 1
-        if COLOR != WHITE:
+        if COLOR != MY_COLOR:
             if count_fps % 100 == 0:
-                data = network.send('RECEIVE')
-                print(data)
+                data = network.send('get_board')
                 if data is not None:
-                    print(data, 'data из board')
-                    print(all_sprites, 'до ')
-                    remove_spites(all_sprites)
-                    load_board(data, board, all_sprites)
-                    board.set_view(50, 50, 50)
-                    print(all_sprites, 'после ')
+                    if data == 'end':
+                        running = False
+                    try:
+                        if send_board(board) != data:
+                            COLOR = color_opponent()
 
-                    # board.load_sprites(all_sprites)
+                        remove_spites(all_sprites)
+                        load_board(data, board, all_sprites)
+                        board.set_view(50, 50, 50)
+                    except:
+                        pass
 
         screen.fill((0, 0, 0))
-        board.render(screen)
+        board.render(screen, MY_COLOR)
         all_sprites.draw(screen)
         pygame.display.flip()
 
