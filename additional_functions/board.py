@@ -34,6 +34,14 @@ def check_wqueen(board):
     return sp
 
 
+class NLO(pygame.sprite.Sprite):
+    def __init__(self, group, name):
+        super().__init__(group)
+        self.image = load_image(name, size=(50, 50), colorkey=-1)
+        self.rect = self.image.get_rect()
+    #def update(self, x, y):
+
+
 class Shapes(pygame.sprite.Sprite):
     # image = load_image("white.png")
 
@@ -47,6 +55,19 @@ class Shapes(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def kill(self):
+        all_sprites.remove(self)
+
+    def kill_aliens(self, x, y):
+        board.field[y][x] = None
+        for i in range(1, 6):
+            self.image = load_image("white.png" if self.color == WHITE else "black.png", size=(50 - 5 * i, 50 - 5 * i), alpha=255 - i * 30)
+            self.rect.x += 2
+            board.render(screen)
+            nlo_sprites.draw(screen)
+            all_sprites.draw(screen)
+
+            pygame.display.flip()
+            clock.tick(5)
         all_sprites.remove(self)
 
 
@@ -124,13 +145,10 @@ class Usual(Shapes):
             sp_kill = []
             print('can_move: ', pos_att)
             for i, j in pos_att:
-                print('wbrk')
                 if (i == x + 2 or i == x - 2) and (j == y + 2 or j == y - 2) and board[j][i] is None:
                     kill = board[(j + y) // 2][(i + x) // 2]
-                    print('kill: ', (j + y) // 2, (i + x) // 2)
                     if kill is None:
                         return False
-
                     if kill.color == COLOR:
                         return False
 
@@ -203,7 +221,7 @@ class Board:
 
         font = pygame.font.Font(None, 17)
         text = font.render(
-            f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
+            f"A{''.join(' ' for _ in range(13))}B              C              D              E              F              G              H",
             True, (0, 0, 0))
         screen.blit(text, (self.left + self.cell_size / 2, 40))
         for i in range(1, 9):
@@ -261,20 +279,17 @@ class Board:
         if rez == 1:
             checker = self.field[y][x]
             self.field[y][x] = None
-            self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+            self.animation_move(checker, x, y, pos_att[0][0], pos_att[0][1])
             self.field[pos_att[0][1]][pos_att[0][0]] = checker
 
         elif len(rez) == len(pos_att):  # при атаке должно совпадать кол-во убранных шашек с кол-вом позиций атак
             checker = self.field[y][x]
             self.field[y][x] = None
             for i in range(len(pos_att)):
-                if i:
-                    pygame.time.wait(300)
                 rez_i = rez[i]
                 pos_att_i = pos_att[i]
-                self.field[rez_i[1]][rez_i[0]].kill()
-                self.field[rez_i[1]][rez_i[0]] = None
-                self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
+                self.animation_kill(rez_i[0], rez_i[1])
+                self.animation_move(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
             if COLOR == BLACK:
@@ -295,10 +310,11 @@ class Board:
         print(COUNT_BLACK_KILLED, COUNT_WHITE_KILLED)
         return True
 
-    def animation(self, checker, x, y, x1, y1):
+    def animation_move(self, checker, x, y, x1, y1):
         '''Анимация перемещения шашек'''
-        delta_x = (x1 - x) * 0.1 * self.cell_size
-        delta_y = (y1 - y) * 0.1 * self.cell_size
+        delta_x = (x1 - x) * 0.1 * 50
+        delta_y = (y1 - y) * 0.1 * 50
+
         for i in range(10):
             checker.rect.x += delta_x
             checker.rect.y += delta_y
@@ -306,6 +322,31 @@ class Board:
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
+
+    def animation_kill(self, x1, y1):
+        '''анимация поедания пешки инопланетянами, не знаю почему именно ими:)'''
+        nlo.rect.x = self.left
+        delta_x = x1 * 50 * 0.1
+        delta_y = y1 * 0.1 * 50
+        for i in range(10):
+            nlo.rect.x += delta_x
+
+            board.render(screen)
+            all_sprites.draw(screen)
+            nlo_sprites.draw(screen)
+            pygame.display.flip()
+            clock.tick(FPS)
+        nlo.rect.y += 0.5 * self.cell_size
+        for i in range(10):
+            nlo.rect.y += delta_y
+
+            board.render(screen)
+            all_sprites.draw(screen)
+            nlo_sprites.draw(screen)
+            pygame.display.flip()
+            clock.tick(FPS)
+        self.field[y1][x1].kill_aliens(x1, y1)
+        nlo.rect.y = 0
 
     def get_cell(self, mouse_pos):
         x, y = mouse_pos[0], mouse_pos[1]
@@ -339,37 +380,23 @@ class Board:
         self.on_click(cell)
 
 
-pygame.init()
-size = 500, 500
-# screen — холст, на котором нужно рисовать:
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Шашки')
-clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
-
-board = Board(8, 8)
-board.set_view(50, 50, 50)
-
-screen.fill((0, 0, 0))
-board.render(screen)
-all_sprites.draw(screen)
-pygame.display.flip()
-
-
 def run():
-    global screen, all_sprites, board, clock
+    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS
     pygame.init()
+    FPS = 50
     size = 500, 500
     # screen — холст, на котором нужно рисовать:
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Шашки')
     clock = pygame.time.Clock()
+
     all_sprites = pygame.sprite.Group()
+    nlo_sprites = pygame.sprite.Group()
+    nlo = NLO(nlo_sprites, 'nlo.png')
 
     board = Board(8, 8)
     board.set_view(50, 50, 50)
 
-    screen.fill((0, 0, 0))
     board.render(screen)
     all_sprites.draw(screen)
     pygame.display.flip()
@@ -383,12 +410,10 @@ def run():
                     board.get_click(event.pos)
                 elif event.button == 3:
                     board.mouse_coords.append(board.get_cell(event.pos))
-                print(board.mouse_coords)
 
-        screen.fill((0, 0, 0))
-        board.render(screen)
-        all_sprites.draw(screen)
-        pygame.display.flip()
+                board.render(screen)
+                all_sprites.draw(screen)
+                pygame.display.flip()
 
 
 if __name__ == '__main__':

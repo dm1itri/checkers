@@ -3,7 +3,7 @@ import pygame
 import os
 
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None, size=(50, 50), alpha=255):
     fullname = os.path.join('additional_functions/data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -16,5 +16,7 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey)
     else:
         image = image.convert_alpha()
-    image = pygame.transform.scale(image, (50, 50))
+    if alpha != 255:
+        image.set_alpha(alpha)
+    image = pygame.transform.scale(image, size)
     return image
