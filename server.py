@@ -43,7 +43,9 @@ def threaded_client(conn, p, gameId):
                     print('Disconnected')
                     break
                 else:
-                    if data == 'get_move':
+                    if game.end:
+                        reply = 'end'.encode()
+                    elif data == 'get_move':
                         if p == 0:
                             if game.p2Move:
                                 reply = send_move(game.p2Move[0], game.p2Move[1]).encode()
@@ -66,15 +68,13 @@ def threaded_client(conn, p, gameId):
                     elif data == 'end':
                         game.end = True
                     else:
-                        if not game.end:
-                            if p == 0:
-                                game.p1Move = load_move(data)
-                            else:
-                                game.p2Move = load_move(data)
-                            COLOR = WHITE if COLOR == BLACK else BLACK
-                            reply = ''.encode()
+                        if p == 0:
+                            game.p1Move = load_move(data)
                         else:
-                            reply = 'end'.encode()
+                            game.p2Move = load_move(data)
+                        COLOR = WHITE if COLOR == BLACK else BLACK
+                        reply = ''.encode()
+
                     print('Received: ', reply)
                     print('Sending: ', reply)
                     conn.sendall(reply)
