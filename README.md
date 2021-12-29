@@ -19,6 +19,9 @@ _**Классы**_:
 - Queen(Shapes)
 - Usual(Shapes)
 - Board
+- Menu
+- Network
+- OnlineGame
 - Будут добавляться в процессе разработки
 
 _**Основные Функции**_:
