@@ -3,12 +3,11 @@ from _thread import *
 
 import pygame.sprite
 
-from additional_functions.board import Board, Usual
-from additional_functions.board import load_board, send_board
+from additional_functions.board import load_move, send_move
 from additional_functions.server.online_game import OnlineGame
 
 server = '192.168.0.3'
-port = 5555
+port = 5557
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -40,13 +39,24 @@ def threaded_client(conn, p, gameId):
 
             if gameId in games:
                 game = games[gameId]
-                main_board = game.board
                 if not data:
                     print('Disconnected')
                     break
                 else:
-                    if data == 'get_board':
-                        reply = send_board(main_board).encode()
+                    if data == 'get_move':
+                        if p == 0:
+                            if game.p2Move:
+                                reply = send_move(game.p2Move[0], game.p2Move[1]).encode()
+                                game.p2Move = False
+                            else:
+                                reply = 'None'.encode()
+                        if p == 1:
+                            if game.p1Move:
+                                reply = send_move(game.p1Move[0], game.p1Move[1]).encode()
+                                game.p1Move = False
+
+                            else:
+                                reply = 'None'.encode()
                     elif data == 'get_colorWent':
                         reply = game.colorWent.encode()
                     elif data == 'first_connect':
@@ -57,9 +67,12 @@ def threaded_client(conn, p, gameId):
                         game.end = True
                     else:
                         if not game.end:
-                            load_board(data, main_board, all_sprites)
+                            if p == 0:
+                                game.p1Move = load_move(data)
+                            else:
+                                game.p2Move = load_move(data)
                             COLOR = WHITE if COLOR == BLACK else BLACK
-                            reply = send_board(main_board).encode()
+                            reply = ''.encode()
                         else:
                             reply = 'end'.encode()
                     print('Received: ', reply)
@@ -94,8 +107,7 @@ while True:
     p = 0
     gameId = (idCount - 1) // 2
     if idCount % 2 == 1:
-        main_board = Board(8, 8)
-        games[gameId] = OnlineGame(main_board, gameId)
+        games[gameId] = OnlineGame(gameId)
         print('Creating a new game ...')
     else:
         games[gameId].ready = 1

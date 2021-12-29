@@ -4,8 +4,7 @@ from additional_functions.button import Button
 from additional_functions.board import online_run
 from additional_functions.settings import settings_run
 from additional_functions.particle import create_particles, part_group
-from additional_functions.server.network import Network
-from additional_functions.server.load_board import load_board, send_board
+
 from additional_functions.search_game import search_game_run
 
 import sys
@@ -59,13 +58,10 @@ class Menu:
                             if but.onclick(event.pos):
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
-                                    data, network, color = search_game_run()
+                                    network, color = search_game_run()
                                     print(color)
-                                    if data is not None:
-                                        print(data)
-                                        board = load_board(data)
-                                        online_run(board, network, color)
-                                        print(board.field)
+                                    online_run(network, color)
+
                                 elif text_btn == 'Настройки':
                                     settings_run()
                     elif event.button == 3:

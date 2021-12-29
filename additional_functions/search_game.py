@@ -1,6 +1,6 @@
 import pygame
 from additional_functions.server.network import Network
-from additional_functions.server.load_board import load_board, send_board
+from additional_functions.board import load_move, send_move
 
 
 def search_game_run():
@@ -30,12 +30,8 @@ def search_game_run():
         if count_fps % 50:
             network.connect()
             color = network.send('first_connect')
-            data = network.send('get_board')
             is_ready = int(network.send('is_ready'))
             print(is_ready, 'is_ready')
-            if is_ready and data:
-                return data, network, color
+            if is_ready:
+                return network, color
 
-
-if __name__ == '__main__':
-    search_game_run()

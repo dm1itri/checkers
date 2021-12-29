@@ -1,9 +1,8 @@
 class OnlineGame:
-    def __init__(self, board, id):
+    def __init__(self, id):
         self.end = False
-        self.p1Went = False
-        self.p2Went = False
+        self.p1Move = False
+        self.p2Move = False
         self.id = id
         self.ready = 0
-        self.board = board
         self.colorWent = 'white'

@@ -201,8 +201,9 @@ class Board:
         self.top = top
         self.cell_size = cell_size
 
-    def render(self, screen, my_color):
+    def render(self, screen, my_color, network):
         self.my_color = my_color
+        self.network = network
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
         font = pygame.font.Font(main_font, 35)
@@ -248,20 +249,27 @@ class Board:
                                             (self.left + self.cell_size * j, self.top + self.cell_size * i,
                                              self.cell_size, self.cell_size))
 
-    def move(self, x, y, pos_att):
+    def move(self, x, y, pos_att, mine):
+        x1, y1, pos_att1 = x, y, pos_att
+
         if len(pos_att) < 1:
             return False
         for i, j in pos_att:
             if i > 7 or i < 0 or j < 0 or j > 7:
                 return False
 
+        print(x, y, pos_att)
         s = self.field[y][x]
+        print(self.field)
+        print('вошел в move', s)
+
         if s is None:
             return False
-        if s.color != COLOR:
+        if s.color != self.my_color and mine:
             return False
 
         rez = s.can_move(self.field, x, y, pos_att)
+        print(rez)
         if not rez:
             return False
         if rez == 1:
@@ -295,6 +303,8 @@ class Board:
             self.field[0][i] = Queen(all_sprites, BLACK)
             print(2)
 
+        if mine:
+            data = self.network.send(send_move((x1, y1), pos_att1))
         return True
 
     def animation(self, checker, x, y, x1, y1):
@@ -304,7 +314,7 @@ class Board:
         for i in range(10):
             checker.rect.x += delta_x
             checker.rect.y += delta_y
-            self.render(screen, self.my_color)
+            self.render(screen, self.my_color, self.network)
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
@@ -335,7 +345,7 @@ class Board:
                     self.mouse_coords = []
                     return
                 self.mouse_coords.append(cell_coords)
-                if self.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:]):
+                if self.move(self.mouse_coords[0][0], self.mouse_coords[0][1], self.mouse_coords[1:], True):
                     COLOR = color_opponent()
                 self.mouse_coords = []
             else:
@@ -346,44 +356,22 @@ class Board:
         self.on_click(cell)
 
 
-def load_board(data, board: Board, group):
+def load_move(data):
+    if data == 'None':
+        return False
+    print(f'{data} = data')
+
     data = data.split('%')
-    last_field_board = board.field.copy()
-    for i in range(len(board.field)):
-        string = board.field[i]
-        for j in range(len(string)):
-            if data[i][j] == '.':
-                board.field[i][j] = None
-            elif data[i][j] == 'w':
-                board.field[i][j] = Usual(group, 'white')
-            elif data[i][j] == 'b':
-                board.field[i][j] = Usual(group, 'black')
-            elif data[i][j] == 'W':
-                board.field[i][j] = Queen(group, 'white')
-            elif data[i][j] == 'B':
-                board.field[i][j] = Queen(group, 'black')
-    return last_field_board
+    last = int(data[0]), int(data[1])
+    new = list(map(int, data[2:]))
+    new = [(new[i], new[i + 1]) for i in range(0, len(new), 2)]
+    return last, new
 
 
-def send_board(board):
-    data = []
-    for i in range(len(board.field)):
-        string = []
-        for j in range(len(board.field[0])):
-            if board.field[i][j] is None:
-                string.append('.')
-            elif isinstance(board.field[i][j], Usual):
-                if board.field[i][j].color == 'white':
-                    string.append('w')
-                elif board.field[i][j].color == 'black':
-                    string.append('b')
-            elif isinstance(board.field[i][j], Queen):
-                if board.field[i][j].color == 'white':
-                    string.append('W')
-                elif board.field[i][j].color == 'black':
-                    string.append('B')
-        data.append(''.join(string))
-    return '%'.join(data)
+def send_move(last, new):
+    new = '%'.join('%'.join([str(i[0]), str(i[1])]) for i in new)
+
+    return '%'.join([str(last[0]), str(last[1]), new])
 
 
 pygame.init()
@@ -395,7 +383,7 @@ all_sprites = pygame.sprite.Group()
 board = None
 
 
-def online_run(board, network, MY_COLOR):
+def online_run(network, MY_COLOR):
     global screen, all_sprites, clock, COLOR
     pygame.init()
     size = 500, 500
@@ -405,12 +393,12 @@ def online_run(board, network, MY_COLOR):
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
 
-    board = board
+    board = Board(8, 8)
     board.set_view(50, 50, 50)
     board.load_sprites(all_sprites)
 
     screen.fill((0, 0, 0))
-    board.render(screen, MY_COLOR)
+    board.render(screen, MY_COLOR, network)
     all_sprites.draw(screen)
     pygame.display.flip()
     running = True
@@ -423,7 +411,6 @@ def online_run(board, network, MY_COLOR):
                 if COLOR == MY_COLOR:
                     if event.button == 1:
                         board.get_click(event.pos)
-                        network.send(send_board(board))
                     elif event.button == 3:
                         board.mouse_coords.append(board.get_cell(event.pos))
                 print(board.mouse_coords)
@@ -431,22 +418,20 @@ def online_run(board, network, MY_COLOR):
         count_fps += 1
         if COLOR != MY_COLOR:
             if count_fps % 100 == 0:
-                data = network.send('get_board')
-                if data is not None:
+                data = network.send('get_move')
+
+                if data is not None and data != 'None':
+                    print(data)
                     if data == 'end':
                         running = False
-                    try:
-                        if send_board(board) != data:
-                            COLOR = color_opponent()
 
-                        remove_spites(all_sprites)
-                        load_board(data, board, all_sprites)
-                        board.set_view(50, 50, 50)
-                    except:
-                        pass
+                    elif load_move(data):
+                        last, new = load_move(data)
+                        board.move(last[0], last[1], new, False)
+                        COLOR = color_opponent()
 
         screen.fill((0, 0, 0))
-        board.render(screen, MY_COLOR)
+        board.render(screen, MY_COLOR, network)
         all_sprites.draw(screen)
         pygame.display.flip()
 
@@ -454,8 +439,3 @@ def online_run(board, network, MY_COLOR):
 def remove_spites(group):
     for sprite in group:
         sprite.kill()
-
-
-if __name__ == '__main__':
-    board = Board(8, 8)
-    print(send_board(board))
