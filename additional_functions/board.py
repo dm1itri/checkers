@@ -370,7 +370,6 @@ def load_move(data):
 
 def send_move(last, new):
     new = '%'.join('%'.join([str(i[0]), str(i[1])]) for i in new)
-
     return '%'.join([str(last[0]), str(last[1]), new])
 
 
@@ -385,62 +384,61 @@ board = None
 
 def online_run(network, MY_COLOR):
     global screen, all_sprites, clock, COLOR
-    try:
-        pygame.init()
-        size = 500, 500
-        # screen — холст, на котором нужно рисовать:
-        screen = pygame.display.set_mode(size)
-        pygame.display.set_caption('Шашки')
-        clock = pygame.time.Clock()
-        all_sprites = pygame.sprite.Group()
 
-        board = Board(8, 8)
-        board.set_view(50, 50, 50)
-        board.load_sprites(all_sprites)
+    pygame.init()
+    size = 500, 500
+    # screen — холст, на котором нужно рисовать:
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Шашки')
+    clock = pygame.time.Clock()
+    all_sprites = pygame.sprite.Group()
+
+    board = Board(8, 8)
+    board.set_view(50, 50, 50)
+    board.load_sprites(all_sprites)
+
+    screen.fill((0, 0, 0))
+    board.render(screen, MY_COLOR, network)
+    all_sprites.draw(screen)
+    pygame.display.flip()
+    running = True
+    count_fps = 0
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if COLOR == MY_COLOR:
+                    if event.button == 1:
+                        board.get_click(event.pos)
+                    elif event.button == 3:
+                        board.mouse_coords.append(board.get_cell(event.pos))
+                print(board.mouse_coords)
+
+        count_fps += 1
+        if COLOR != MY_COLOR:
+            if count_fps % 100 == 0:
+                data = network.send('get_move')
+                if data == 'end':
+                    running = False
+                    continue
+
+                elif data is not None and data != 'None' and data != '-':
+                    print(data)
+
+                    if load_move(data):
+                        last, new = load_move(data)
+                        board.move(last[0], last[1], new, False)
+                        COLOR = color_opponent()
 
         screen.fill((0, 0, 0))
         board.render(screen, MY_COLOR, network)
         all_sprites.draw(screen)
         pygame.display.flip()
-        running = True
-        count_fps = 0
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if COLOR == MY_COLOR:
-                        if event.button == 1:
-                            board.get_click(event.pos)
-                        elif event.button == 3:
-                            board.mouse_coords.append(board.get_cell(event.pos))
-                    print(board.mouse_coords)
+    print('Я ЗАКРЫЛСя')
+    network.send('end')
 
-            count_fps += 1
-            if COLOR != MY_COLOR:
-                if count_fps % 100 == 0:
-                    data = network.send('get_move')
 
-                    if data is not None and data != 'None':
-                        print(data)
-
-                        if load_move(data):
-                            last, new = load_move(data)
-                            board.move(last[0], last[1], new, False)
-                            COLOR = color_opponent()
-            if count_fps % 100 == 0:
-                if network.send('get_end') == 'YES':
-                    running = False
-
-            screen.fill((0, 0, 0))
-            board.render(screen, MY_COLOR, network)
-            all_sprites.draw(screen)
-            pygame.display.flip()
-        print('Я ЗАКРЫЛСя')
-        network.send('end')
-
-    except Exception as E:
-        print(E)
 
 
 def remove_spites(group):

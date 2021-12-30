@@ -6,7 +6,7 @@ import pygame.sprite
 from additional_functions.board import load_move, send_move
 from additional_functions.server.online_game import OnlineGame
 
-server = '192.168.0.3'
+server = '5.23.55.52'
 port = 5557
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,9 +43,7 @@ def threaded_client(conn, p, gameId):
                     print('Disconnected')
                     break
                 else:
-                    if game.end:
-                        reply = 'end'.encode()
-                    elif data == 'get_move':
+                    if data == 'get_move':
                         if p == 0:
                             if game.p2Move:
                                 reply = send_move(game.p2Move[0], game.p2Move[1]).encode()
@@ -68,13 +66,15 @@ def threaded_client(conn, p, gameId):
                     elif data == 'end':
                         game.end = True
                     else:
-                        if p == 0:
-                            game.p1Move = load_move(data)
+                        if not game.end:
+                            if p == 0:
+                                game.p1Move = load_move(data)
+                            else:
+                                game.p2Move = load_move(data)
+                            COLOR = WHITE if COLOR == BLACK else BLACK
+                            reply = '-'.encode()
                         else:
-                            game.p2Move = load_move(data)
-                        COLOR = WHITE if COLOR == BLACK else BLACK
-                        reply = ''.encode()
-
+                            reply = 'end'.encode()
                     print('Received: ', reply)
                     print('Sending: ', reply)
                     conn.sendall(reply)
