@@ -204,11 +204,25 @@ class Board:
     def render(self, screen, my_color, network):
         self.my_color = my_color
         self.network = network
+        screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
+        font = pygame.font.Font(None, 40)
+
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
         screen.blit(text, (130, 10))
+
+        text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
+        screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
+                           self.top + self.cell_size * self.height + 10))
+        text = font.render(":", True, '#964b00')
+        screen.blit(text,
+                    (self.left + 0.5 * self.cell_size * self.width - 1, self.top + self.cell_size * self.height + 10))
+        text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
+        screen.blit(text,
+                    (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
+        # screen.blit(text, (130, 10))
         font = pygame.font.Font(None, 17)
         text = font.render(
             f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
@@ -250,6 +264,7 @@ class Board:
                                              self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att, mine):
+        global COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
         x1, y1, pos_att1 = x, y, pos_att
 
         if len(pos_att) < 1:
@@ -291,6 +306,10 @@ class Board:
                 self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
+            if COLOR == BLACK:
+                COUNT_WHITE_KILLED += len(rez)
+            else:
+                COUNT_BLACK_KILLED += len(rez)
         else:
             return False
         sp_bq = check_bqueen(self.field)
@@ -304,7 +323,9 @@ class Board:
             print(2)
 
         if mine:
+            print('до отправки')
             data = self.network.send(send_move((x1, y1), pos_att1))
+            print('после отправки')
         return True
 
     def animation(self, checker, x, y, x1, y1):
@@ -382,63 +403,73 @@ all_sprites = pygame.sprite.Group()
 board = None
 
 
-def online_run(network, MY_COLOR):
-    global screen, all_sprites, clock, COLOR
+def online_run(network, MY_COLOR, color):
+    global screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
+    try:
+        COUNT_WHITE_KILLED = 0
+        COUNT_BLACK_KILLED = 0
+        COLOR = color
 
-    pygame.init()
-    size = 500, 500
-    # screen — холст, на котором нужно рисовать:
-    screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Шашки')
-    clock = pygame.time.Clock()
-    all_sprites = pygame.sprite.Group()
+        pygame.init()
+        size = 500, 500
+        # screen — холст, на котором нужно рисовать:
+        screen = pygame.display.set_mode(size)
+        pygame.display.set_caption('Шашки')
+        clock = pygame.time.Clock()
+        all_sprites = pygame.sprite.Group()
 
-    board = Board(8, 8)
-    board.set_view(50, 50, 50)
-    board.load_sprites(all_sprites)
-
-    screen.fill((0, 0, 0))
-    board.render(screen, MY_COLOR, network)
-    all_sprites.draw(screen)
-    pygame.display.flip()
-    running = True
-    count_fps = 0
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if COLOR == MY_COLOR:
-                    if event.button == 1:
-                        board.get_click(event.pos)
-                    elif event.button == 3:
-                        board.mouse_coords.append(board.get_cell(event.pos))
-                print(board.mouse_coords)
-
-        count_fps += 1
-        if COLOR != MY_COLOR:
-            if count_fps % 100 == 0:
-                data = network.send('get_move')
-                if data == 'end':
-                    running = False
-                    continue
-
-                elif data is not None and data != 'None' and data != '-':
-                    print(data)
-
-                    if load_move(data):
-                        last, new = load_move(data)
-                        board.move(last[0], last[1], new, False)
-                        COLOR = color_opponent()
+        board = Board(8, 8)
+        board.set_view(50, 50, 50)
+        board.load_sprites(all_sprites)
 
         screen.fill((0, 0, 0))
         board.render(screen, MY_COLOR, network)
         all_sprites.draw(screen)
         pygame.display.flip()
-    print('Я ЗАКРЫЛСя')
-    network.send('end')
+        running = True
+        count_fps = 0
 
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if COLOR == MY_COLOR:
+                        if event.button == 1:
+                            board.get_click(event.pos)
+                        elif event.button == 3:
+                            board.mouse_coords.append(board.get_cell(event.pos))
+                    print(board.mouse_coords)
 
+            if COUNT_BLACK_KILLED == 12 or COUNT_WHITE_KILLED == 12:
+                running = False
+                continue
+
+            count_fps += 1
+            if count_fps % 100 == 0:
+                data = network.send('get_move')
+                print(data)
+                if data == 'end':
+                    break
+                if COLOR != MY_COLOR:
+                    if count_fps % 100 == 0:
+                        if data is not None and data != 'None' and data != '-':
+                            if load_move(data):
+                                last, new = load_move(data)
+                                board.move(last[0], last[1], new, False)
+                                COLOR = color_opponent()
+
+            screen.fill((0, 0, 0))
+            board.render(screen, MY_COLOR, network)
+            all_sprites.draw(screen)
+            pygame.display.flip()
+        else:
+            network.send('end')
+        network.close()
+        print('Я ЗАКРЫЛСя')
+
+    except Exception as E:
+        print(E)
 
 
 def remove_spites(group):
