@@ -52,8 +52,10 @@ class ThreadMain(Thread):
                         break
                     else:
                         if game.end:
-                            reply = 'end'.encode()
                             del games[self.gameId]
+                            reply = 'end'.encode()
+                            self.conn.sendall(reply)
+                            break
                         elif data == 'get_move':
                             if self.p == 0:
                                 if game.p2Move:
@@ -77,7 +79,8 @@ class ThreadMain(Thread):
                         elif data == 'end':
                             game.end = True
                             reply = 'end'.encode()
-
+                            self.conn.sendall(reply)
+                            break
                         else:
                             if self.p == 0:
                                 game.p1Move = load_move(data)
@@ -89,7 +92,6 @@ class ThreadMain(Thread):
                         print('Received: ', reply)
                         print('Sending: ', reply)
                         self.conn.sendall(reply)
-                        print(games)
 
             except Exception as e:
                 print(e)
