@@ -410,6 +410,9 @@ def online_run(network, MY_COLOR, color):
         COUNT_BLACK_KILLED = 0
         COLOR = color
 
+        flag_winner = None
+        flag_quit = False
+
         pygame.init()
         size = 500, 500
         # screen — холст, на котором нужно рисовать:
@@ -433,6 +436,7 @@ def online_run(network, MY_COLOR, color):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    flag_quit = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if COLOR == MY_COLOR:
                         if event.button == 1:
@@ -441,17 +445,15 @@ def online_run(network, MY_COLOR, color):
                             board.mouse_coords.append(board.get_cell(event.pos))
                     print(board.mouse_coords)
 
-            if COUNT_BLACK_KILLED == 12 or COUNT_WHITE_KILLED == 12:
-                running = False
-                continue
-
             count_fps += 1
             if count_fps % 100 == 0:
                 data = network.send('get_move')
                 print(data)
                 if data == 'end':
+                    print('вышел', COUNT_WHITE_KILLED, COUNT_BLACK_KILLED)
                     break
-                if COLOR != MY_COLOR:
+
+                elif COLOR != MY_COLOR:
                     if count_fps % 100 == 0:
                         if data is not None and data != 'None' and data != '-':
                             if load_move(data):
@@ -459,17 +461,39 @@ def online_run(network, MY_COLOR, color):
                                 board.move(last[0], last[1], new, False)
                                 COLOR = color_opponent()
 
+            flag_winner = winner(MY_COLOR)
+            if flag_winner is not None:
+                network.send('winner')
+                running = False
+                continue
+
             screen.fill((0, 0, 0))
             board.render(screen, MY_COLOR, network)
             all_sprites.draw(screen)
             pygame.display.flip()
-        else:
+
+        if flag_quit:
             network.send('end')
         network.close()
-        print('Я ЗАКРЫЛСя')
+        return flag_winner
 
     except Exception as E:
         print(E)
+
+
+def winner(MY_COLOR):
+    if COUNT_BLACK_KILLED == 12:
+        if MY_COLOR == WHITE:
+            return True
+        else:
+            return False
+
+    if COUNT_WHITE_KILLED == 12:
+        if MY_COLOR == BLACK:
+            return True
+        else:
+            return False
+    return None
 
 
 def remove_spites(group):

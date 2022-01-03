@@ -30,8 +30,9 @@ def search_game_run():
         if count_fps % 50:
             network.connect()
             color = network.send('first_connect')
-            is_ready = int(network.send('is_ready'))
-            print(is_ready, 'is_ready')
-            if is_ready:
-                return network, color
+            if color is not None:
+                is_ready = int(network.send('is_ready'))
+                print(is_ready, 'is_ready')
+                if is_ready:
+                    return network, color
 

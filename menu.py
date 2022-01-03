@@ -1,11 +1,13 @@
 import pygame
-
+from pgu import gui
 from additional_functions.button import Button
 from additional_functions.board import online_run
 from additional_functions.settings import settings_run
 from additional_functions.particle import create_particles, part_group
 
 from additional_functions.search_game import search_game_run
+from additional_functions.dialog_win import dialog_run
+from additional_functions.game_over import search_game_over_run
 
 import sys
 
@@ -13,6 +15,18 @@ import sys
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+class SimpleDialog(gui.Dialog):
+    def __init__(self):
+        title = gui.Label("Spam")
+        main = gui.Container(width=20, height=20)
+        # I patched PGU to use new style classes.
+        super(SimpleDialog, self).__init__(title, main, width=40, height=40)
+
+    def close(self, *args, **kwargs):
+        print("closing")
+        return super(SimpleDialog, self).close(*args, **kwargs)
 
 
 class Menu:
@@ -58,10 +72,14 @@ class Menu:
                             if but.onclick(event.pos):
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
-                                    network, color = search_game_run()
-                                    print(color)
-                                    online_run(network, color)
-
+                                    network, my_color = search_game_run()
+                                    if dialog_run('Мы нашли игру,\nприсоединиться?',
+                                                  self.main_font):
+                                        winner = online_run(network, my_color, 'white')
+                                        print(winner)
+                                        search_game_over_run(winner, self.main_font)
+                                    else:
+                                        network.send('end')
                                 elif text_btn == 'Настройки':
                                     settings_run()
                     elif event.button == 3:

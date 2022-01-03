@@ -6,6 +6,7 @@ from additional_functions.server.online_game import OnlineGame
 
 host = socket.gethostbyname(socket.gethostname())
 server = host
+print(host)
 port = 6668
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,7 +38,6 @@ class ThreadMain(Thread):
 
     def run(self):
         global COLOR, WHITE, BLACK, idCount
-        print('октрылся')
         self.conn.send(str.encode(str(p)))
         reply = ''
         while True:
@@ -45,17 +45,23 @@ class ThreadMain(Thread):
                 data = self.conn.recv(2048).decode()
 
                 if self.gameId in games:
+                    print('в цикле', self.p)
                     game = games[self.gameId]
                     if not data:
                         print('Disconnected')
                         game.end = True
                         break
                     else:
-                        if game.end:
+
+                        if game.end and not game.winner:
                             del games[self.gameId]
                             reply = 'end'.encode()
                             self.conn.sendall(reply)
                             break
+
+                        elif data == 'winner':
+                            game.winner = True
+
                         elif data == 'get_move':
                             if self.p == 0:
                                 if game.p2Move:
