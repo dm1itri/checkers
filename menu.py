@@ -66,20 +66,22 @@ class Menu:
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    create_particles(event.pos)
+                    # create_particles(event.pos)
                     if event.button == 1:
                         for but in buttons:
                             if but.onclick(event.pos):
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
-                                    network, my_color = search_game_run()
-                                    if dialog_run('Мы нашли игру,\nприсоединиться?',
-                                                  self.main_font):
-                                        winner = online_run(network, my_color, 'white')
-                                        print(winner)
-                                        search_game_over_run(winner, self.main_font)
-                                    else:
-                                        network.send('end')
+                                    data = search_game_run()
+                                    if data:
+                                        network, my_color = data
+                                        if dialog_run('Мы нашли игру,\nприсоединиться?',
+                                                      self.main_font):
+                                            winner = online_run(network, my_color, 'white')
+                                            print(winner)
+                                            search_game_over_run(winner, self.main_font)
+                                        else:
+                                            network.send('end')
                                 elif text_btn == 'Настройки':
                                     settings_run()
                     elif event.button == 3:

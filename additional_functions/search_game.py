@@ -16,11 +16,13 @@ def search_game_run():
 
     font = pygame.font.Font(None, 60)
     text = font.render('Игра в поиске', True, 'black')
+    network.connect()
     count_fps = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                return False
         screen.fill('white')
         screen.blit(text, (width // 2 - text.get_size()[0] // 2, height // 2 - text.get_size()[1] // 2))
         clock.tick(fps)
@@ -28,9 +30,9 @@ def search_game_run():
 
         count_fps += 1
         if count_fps % 50:
-            network.connect()
             color = network.send('first_connect')
-            if color is not None:
+            print(color)
+            if color is not None and color != 'end' and color:
                 is_ready = int(network.send('is_ready'))
                 print(is_ready, 'is_ready')
                 if is_ready:

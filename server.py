@@ -45,11 +45,12 @@ class ThreadMain(Thread):
                 data = self.conn.recv(2048).decode()
 
                 if self.gameId in games:
-                    print('в цикле', self.p)
                     game = games[self.gameId]
                     if not data:
                         print('Disconnected')
                         game.end = True
+                        if not game.ready:
+                            idCount += 1
                         break
                     else:
 

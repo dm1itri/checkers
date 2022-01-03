@@ -7,10 +7,6 @@ class Network:
         self.server = '5.23.55.52'
         self.port = 6668
         self.addr = (self.server, self.port)
-    #     self.first_connect = self.connect()
-    #
-    # def first_connect(self):
-    #     return self.p
 
     def connect(self):
         try:
