@@ -100,30 +100,24 @@ class Queen(Shapes):
         for i, j in pos_att:
             sp_kill1 = []
             if abs(j - y) == abs(i - x) and board[j][i] is None:
-                if (j > y) and (i > x):
-                    v_step, h_step = 1, 1
-                elif (j > y) and (i < x):
-                    v_step, h_step = 1, -1
-                elif (j < y) and (i < x):
-                    v_step, h_step = -1, -1
-                else:  # elif (j < y) and (i > x)
-                    v_step, h_step = -1, 1
-
-                for i1 in range(abs(j - y)):
-                    iv = -i1 if v_step == -1 else i1
-                    ih = -i1 if h_step == -1 else i1
-                    if board[y + v_step + iv][x + h_step + ih] is not None:
-                        if board[y + v_step + iv][x + h_step + ih].color == COLOR:
+                for i1 in range(1, abs(j - y) + 1):
+                    iv = -i1 if j < y else i1
+                    ih = -i1 if i < x else i1
+                    if board[y + iv][x + ih] is not None:
+                        if board[y + iv][x + ih].color == COLOR:
                             return False
-                        sp_kill1.append([x + h_step + ih, y + v_step + iv])
+                        sp_kill1.append([x + ih, y + iv])
+
                 if len(sp_kill1) > 1:
                     return False
                 sp_kill.extend(sp_kill1)
                 x, y = i, j
             else:
                 return False
-        if sp_kill is []:
+
+        if sp_kill == []:  # было sp_kill is []
             return 1
+
         return sp_kill
 
 
@@ -164,7 +158,6 @@ class Board:
         self.width = width
         self.height = height
         self.field = [[None] * 8 for _ in range(8)]
-
         self.field[0][1] = Usual(all_sprites, WHITE)
         self.field[0][3] = Usual(all_sprites, WHITE)
         self.field[0][5] = Usual(all_sprites, WHITE)
@@ -207,7 +200,6 @@ class Board:
         screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
-        font = pygame.font.Font(None, 40)
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
@@ -222,11 +214,8 @@ class Board:
         text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
-        # screen.blit(text, (130, 10))
-        font = pygame.font.Font(None, 17)
-        text = font.render(
-            f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
-            True, (0, 0, 0))
+        font = pygame.font.Font(main_font, 17)
+        text = font.render('              '.join("ABCDEFGH"), True, (0, 0, 0))
         screen.blit(text, (self.left + self.cell_size / 2, 40))
         for i in range(1, 9):
             text = font.render(str(i), True, (0, 0, 0))
