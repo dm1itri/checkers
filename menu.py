@@ -1,5 +1,4 @@
 import pygame
-from pgu import gui
 from additional_functions.button import Button
 from additional_functions.board import online_run
 from additional_functions.settings import settings_run
