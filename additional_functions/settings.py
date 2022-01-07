@@ -1,9 +1,9 @@
 import pygame
 
 
-def settings_run():
+def settings_run(main_font):
     pygame.init()
-    size = width, height =500, 500
+    size = width, height = 500, 500
     # screen — холст, на котором нужно рисовать:
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Шашки')
@@ -11,7 +11,7 @@ def settings_run():
     running = True
 
     font = pygame.font.Font(None, 60)
-    text = font.render('В разработке', True, 'black')
+    text = 'Звук'
 
     while running:
         for event in pygame.event.get():
@@ -19,9 +19,12 @@ def settings_run():
                 running = False
 
         screen.fill('white')
-        screen.blit(text, (width // 2 - text.get_size()[0] // 2, height // 2 - text.get_size()[1] // 2))
+        lines = text.splitlines()
+        for i, l in enumerate(lines):
+            screen.blit(_text(main_font, 50, l, 'black'), (40, 30 + 40 * i))
         pygame.display.flip()
 
 
-if __name__ == '__main__':
-    settings_run()
+def _text(font, size, text, color):
+    font = pygame.font.Font(font, size)
+    return font.render(text, True, color)

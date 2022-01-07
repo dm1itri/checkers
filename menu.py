@@ -72,7 +72,7 @@ class Menu:
                             if but.onclick(event.pos):
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
-                                    data = search_game_run()
+                                    data = search_game_run(self.main_font)
                                     if data:
                                         network, my_color = data
                                         if dialog_run('Мы нашли игру,\nприсоединиться?',
@@ -83,7 +83,7 @@ class Menu:
                                         else:
                                             network.send('end')
                                 elif text_btn == 'Настройки':
-                                    settings_run()
+                                    settings_run(self.main_font)
                     elif event.button == 3:
                         pass
 

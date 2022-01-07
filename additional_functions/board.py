@@ -60,6 +60,7 @@ class Shapes(pygame.sprite.Sprite):
         super().__init__(group)
         self.color = color
         self.image = load_image("white.png" if color == WHITE else "black.png")
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -94,6 +95,7 @@ class Queen(Shapes):
     def __init__(self, group, color):
         super().__init__(group, color)
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
+        self.image = pygame.transform.scale(self.image, (50, 50))
 
     def can_move(self, board, x, y, pos_att):
         sp_kill = []
