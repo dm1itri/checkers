@@ -1,55 +1,45 @@
 import pygame
-from additional_functions.server.network import Network
-from additional_functions.board import load_move, send_move
 from additional_functions.button import Button
 
 
-def dialog_run(text, main_font, sounds):
+def on_off_run(main_font, sounds):
     pygame.init()
-    size = width, height = 500, 300
-    fps = 30
+    size = width, height = 500, 500
     # screen — холст, на котором нужно рисовать:
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Question')
-    clock = pygame.time.Clock()
+    pygame.display.set_caption('Шашки')
     buttons_group = pygame.sprite.Group()
+    clock = pygame.time.Clock()
     running = True
 
-    font = pygame.font.Font(None, 60)
-    text = font.render(text, True, 'black')
-
-    main_text = 'Мы нашли игру,\nприсоединиться?'
-    texts = {i[0]: i[1] for i in enumerate(['Да', 'Нет'])}
+    texts = {i[0]: i[1] for i in enumerate(['Онлайн игра', 'Оффлайн игра'])}
     buttons = {}
     for i in range(1, len(texts) + 1):
         text = _text(main_font, 35, texts[i - 1], '#c15c0f')
-        btn = Button(50 + 100 * i, 180, 65, 70, text, '#a04c0b', screen, buttons_group)
+        btn = Button(120, 80 * i + 30, 60, 280, text, '#a04c0b', screen, buttons_group)
+
         buttons[btn] = texts[i - 1]
 
-    print(buttons_group)
+    main_text = _text(main_font, 50, 'Выбор', 'black')
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for but in buttons:
+                for but in list(buttons.keys()):
                     if but.onclick(event.pos):
                         if sounds['on_sounds']:
                             sounds['click'].play(0)
                         text_btn = buttons[but]
-                        if text_btn == 'Да':
-                            return True
-                        elif text_btn == 'Нет':
-                            return False
+                        if text_btn == 'Онлайн игра':
+                            return 'online'
+                        return 'offline'
         screen.fill('white')
-        lines = main_text.splitlines()
-        for i, l in enumerate(lines):
-            screen.blit(_text(main_font, 50, l, 'black'), (50, 50 + 35*i))
+        screen.blit(main_text, (width // 2 - (main_text.get_size()[0] // 2), 20))
 
         buttons_group.draw(screen)
         buttons_group.update()
-
-        clock.tick(fps)
         pygame.display.flip()
 
 

@@ -8,6 +8,8 @@ BLACK = 'black'
 COLOR = WHITE
 MY_COLOR = WHITE
 main_font = None
+COUNT_WHITE_KILLED = 0
+COUNT_BLACK_KILLED = 0
 
 
 # def load_board(filename):
@@ -102,30 +104,24 @@ class Queen(Shapes):
         for i, j in pos_att:
             sp_kill1 = []
             if abs(j - y) == abs(i - x) and board[j][i] is None:
-                if (j > y) and (i > x):
-                    v_step, h_step = 1, 1
-                elif (j > y) and (i < x):
-                    v_step, h_step = 1, -1
-                elif (j < y) and (i < x):
-                    v_step, h_step = -1, -1
-                else:  # elif (j < y) and (i > x)
-                    v_step, h_step = -1, 1
-
-                for i1 in range(abs(j - y)):
-                    iv = -i1 if v_step == -1 else i1
-                    ih = -i1 if h_step == -1 else i1
-                    if board[y + v_step + iv][x + h_step + ih] is not None:
-                        if board[y + v_step + iv][x + h_step + ih].color == COLOR:
+                for i1 in range(1, abs(j - y) + 1):
+                    iv = -i1 if j < y else i1
+                    ih = -i1 if i < x else i1
+                    if board[y + iv][x + ih] is not None:
+                        if board[y + iv][x + ih].color == COLOR:
                             return False
-                        sp_kill1.append([x + h_step + ih, y + v_step + iv])
+                        sp_kill1.append([x + ih, y + iv])
+
                 if len(sp_kill1) > 1:
                     return False
                 sp_kill.extend(sp_kill1)
                 x, y = i, j
             else:
                 return False
-        if sp_kill is []:
+
+        if sp_kill == []:  # было sp_kill is []
             return 1
+
         return sp_kill
 
 
@@ -215,7 +211,7 @@ class Board:
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
-        screen.blit(text, (130, 10))
+        screen.blit(text, (500 // 2 - (text.get_size()[0] // 2), 10))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
@@ -226,7 +222,10 @@ class Board:
         text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
-        # screen.blit(text, (130, 10))
+        text = font.render(f"Вы играете за {'белых' if my_color == WHITE else 'черных'}", True, (255, 255, 255))
+        screen.blit(text,
+                    (500 // 2 - (text.get_size()[0] // 2), self.top + self.cell_size * self.height + 50))
+
         font = pygame.font.Font(None, 17)
         text = font.render(
             f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
@@ -256,7 +255,7 @@ class Board:
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
             if self.field[y][x]:
-                if self.field[y][x].color == COLOR:
+                if self.field[y][x].color == self.my_color:
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
 
@@ -294,8 +293,7 @@ class Board:
         if rez == 1:
             checker = self.field[y][x]
             self.field[y][x] = None
-            if self.sounds['on_sounds']:
-                self.sounds['move'].play(0)
+
             self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
             self.field[pos_att[0][1]][pos_att[0][0]] = checker
 
@@ -309,8 +307,7 @@ class Board:
                 pos_att_i = pos_att[i]
                 self.field[rez_i[1]][rez_i[0]].kill()
                 self.field[rez_i[1]][rez_i[0]] = None
-                if self.sounds['on']:
-                    self.sounds['move'].play(0)
+
                 self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
@@ -329,7 +326,7 @@ class Board:
             self.field[0][i].kill()
             self.field[0][i] = Queen(all_sprites, BLACK)
             print(2)
-        if mine:
+        if mine and self.network is not None:
             print('до отправки')
             data = self.network.send(send_move((x1, y1), pos_att1))
             print('после отправки')
@@ -337,6 +334,9 @@ class Board:
 
     def animation(self, checker, x, y, x1, y1):
         '''Анимация перемещения шашек'''
+        if self.sounds['on_sounds']:
+            self.sounds['move'].play(0)
+
         delta_x = (x1 - x) * 0.1 * self.cell_size
         delta_y = (y1 - y) * 0.1 * self.cell_size
         for i in range(10):
@@ -346,6 +346,10 @@ class Board:
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
+
+    def bot_move(self):
+        """ИИ для бота"""
+        return False
 
     def load_sprites(self, group):
         for lst_sprites in list(map(lambda x: list(filter(lambda y: y is not None, x)), self.field)):
@@ -422,7 +426,7 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        size = 500, 500
+        size = 500, 550
         # screen — холст, на котором нужно рисовать:
         screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Шашки')
@@ -487,6 +491,47 @@ def online_run(network, MY_COLOR, color, sounds):
 
     except Exception as E:
         print(E)
+
+
+def offline_run(sounds):
+    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS, COLOR
+    pygame.init()
+    FPS = 50
+    size = 500, 550
+    COLOR = WHITE
+    MY_COLOR = WHITE
+    # screen — холст, на котором нужно рисовать:
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Шашки')
+    clock = pygame.time.Clock()
+
+    all_sprites = pygame.sprite.Group()
+    nlo_sprites = pygame.sprite.Group()
+
+    board = Board(8, 8)
+    board.set_view(50, 50, 50)
+
+    board.render(screen, MY_COLOR, None, sounds)
+    all_sprites.draw(screen)
+    pygame.display.flip()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if COLOR == MY_COLOR:
+                    if event.button == 1:
+                        board.get_click(event.pos)
+                    elif event.button == 3:
+                        board.mouse_coords.append(board.get_cell(event.pos))
+
+        if COLOR != MY_COLOR:
+            board.bot_move()
+
+        board.render(screen, MY_COLOR, None, sounds)
+        all_sprites.draw(screen)
+        pygame.display.flip()
 
 
 def winner(MY_COLOR):

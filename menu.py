@@ -1,12 +1,13 @@
 import pygame
 from additional_functions.button import Button
-from additional_functions.board import online_run
+from additional_functions.board import online_run, offline_run
 from additional_functions.settings import settings_run
 from additional_functions.particle import create_particles, part_group
 
 from additional_functions.search_game import search_game_run
 from additional_functions.dialog_win import dialog_run
 from additional_functions.game_over import game_over_run
+from additional_functions.online_offline_win import on_off_run
 
 import sys
 
@@ -14,6 +15,7 @@ import sys
 def terminate():
     pygame.quit()
     sys.exit()
+
 
 class Menu:
     def __init__(self):
@@ -61,6 +63,7 @@ class Menu:
         clock = pygame.time.Clock()
         running = True
         while running:
+            pygame.display.set_caption('Меню')
             size = width, height = 700, 500
             screen = pygame.display.set_mode(size)
 
@@ -75,20 +78,24 @@ class Menu:
                                     click.play(0)
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
-                                    data = search_game_run(self.main_font)
-                                    if data:
-                                        if sounds['on_sounds']:
-                                            sounds['find'].play(0)
-                                        network, my_color = data
-                                        if dialog_run('Мы нашли игру,\nприсоединиться?',
-                                                      self.main_font, sounds):
-                                            pygame.mixer.music.set_volume(0.05)
-                                            winner = online_run(network, my_color, 'white', sounds)
-                                            pygame.mixer.music.set_volume(0.2)
-                                            game_over_run(winner, self.main_font, sounds)
+                                    out = on_off_run(self.main_font, sounds)
+                                    if out == 'online':
+                                        data = search_game_run(self.main_font)
+                                        if data:
+                                            if sounds['on_sounds']:
+                                                sounds['find'].play(0)
+                                            network, my_color = data
+                                            if dialog_run('Мы нашли игру,\nприсоединиться?',
+                                                          self.main_font, sounds):
+                                                pygame.mixer.music.set_volume(0.05)
+                                                winner = online_run(network, my_color, 'white', sounds)
+                                                pygame.mixer.music.set_volume(0.2)
+                                                game_over_run(winner, self.main_font, sounds)
 
-                                        else:
-                                            network.send('end')
+                                            else:
+                                                network.send('end')
+                                    elif out == 'offline':
+                                        offline_run(sounds)
                                 elif text_btn == 'Настройки':
                                     settings_run(self.main_font, sounds)
                     elif event.button == 3:
