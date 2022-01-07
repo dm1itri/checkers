@@ -408,6 +408,7 @@ board = None
 def online_run(network, MY_COLOR, color):
     global screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
     try:
+
         COUNT_WHITE_KILLED = 0
         COUNT_BLACK_KILLED = 0
         COLOR = color

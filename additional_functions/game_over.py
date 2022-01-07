@@ -4,7 +4,7 @@ from additional_functions.board import load_move, send_move
 from additional_functions.button import Button
 
 
-def search_game_over_run(winner, main_font):
+def game_over_run(winner, main_font, click):
     pygame.init()
     size = width, height = 550, 300
     fps = 30
@@ -36,6 +36,7 @@ def search_game_over_run(winner, main_font):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for but in buttons:
                     if but.onclick(event.pos):
+                        click.play(0)
                         text_btn = buttons[but]
                         if text_btn == 'Ок':
                             return
