@@ -58,10 +58,14 @@ class Menu:
 
         # добваление музыки
         pygame.mixer.music.load('additional_functions/data/main_s.mp3')
-        click = pygame.mixer.Sound('additional_functions/data/click.wav')
-        find_sound = pygame.mixer.Sound('additional_functions/data/find.wav')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1, 0, 10)
+
+        sounds = {}
+        click = pygame.mixer.Sound('additional_functions/data/click.wav')
+        find_sound = pygame.mixer.Sound('additional_functions/data/find.wav')
+        sounds['click'] = click
+        sounds['find'] = find_sound
 
         clock = pygame.time.Clock()
         running = True
@@ -81,15 +85,14 @@ class Menu:
                                 if text_btn == 'Играть':
                                     data = search_game_run(self.main_font)
                                     if data:
-                                        find_sound.play(0, 0, 80)
+                                        sounds['find'].play(0)
                                         network, my_color = data
                                         if dialog_run('Мы нашли игру,\nприсоединиться?',
                                                       self.main_font, click):
-                                            pygame.mixer.music.pause()
+                                            pygame.mixer.music.set_volume(0.05)
                                             winner = online_run(network, my_color, 'white')
-                                            game_over_run(winner, self.main_font, click)
-                                            pygame.mixer.music.unpause()
-
+                                            pygame.mixer.music.set_volume(0.2)
+                                            game_over_run(winner, self.main_font, sounds)
 
                                         else:
                                             network.send('end')

@@ -56,7 +56,6 @@ def settings_run(main_font, click):
 
         buttons_group.draw(screen)
         buttons_group.update()
-        print(buttons_group, buttons)
         pygame.display.flip()
 
 
