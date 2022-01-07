@@ -1,5 +1,4 @@
 import pygame
-from pgu import gui
 from additional_functions.button import Button
 from additional_functions.board import online_run
 from additional_functions.settings import settings_run
@@ -15,19 +14,6 @@ import sys
 def terminate():
     pygame.quit()
     sys.exit()
-
-
-class SimpleDialog(gui.Dialog):
-    def __init__(self):
-        title = gui.Label("Spam")
-        main = gui.Container(width=20, height=20)
-        # I patched PGU to use new style classes.
-        super(SimpleDialog, self).__init__(title, main, width=40, height=40)
-
-    def close(self, *args, **kwargs):
-        print("closing")
-        return super(SimpleDialog, self).close(*args, **kwargs)
-
 
 class Menu:
     def __init__(self):
