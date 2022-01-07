@@ -36,7 +36,8 @@ def game_over_run(winner, main_font, sounds):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for but in buttons:
                     if but.onclick(event.pos):
-                        sounds['click'].play(0)
+                        if sounds['on_sounds']:
+                            sounds['click'].play(0)
                         text_btn = buttons[but]
                         if text_btn == 'Ок':
                             return

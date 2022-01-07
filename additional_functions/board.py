@@ -203,9 +203,11 @@ class Board:
         self.top = top
         self.cell_size = cell_size
 
-    def render(self, screen, my_color, network):
+    def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
         self.network = network
+        self.sounds = sounds
+
         screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
@@ -292,6 +294,8 @@ class Board:
         if rez == 1:
             checker = self.field[y][x]
             self.field[y][x] = None
+            if self.sounds['on_sounds']:
+                self.sounds['move'].play(0)
             self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
             self.field[pos_att[0][1]][pos_att[0][0]] = checker
 
@@ -305,6 +309,8 @@ class Board:
                 pos_att_i = pos_att[i]
                 self.field[rez_i[1]][rez_i[0]].kill()
                 self.field[rez_i[1]][rez_i[0]] = None
+                if self.sounds['on']:
+                    self.sounds['move'].play(0)
                 self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
@@ -323,7 +329,6 @@ class Board:
             self.field[0][i].kill()
             self.field[0][i] = Queen(all_sprites, BLACK)
             print(2)
-
         if mine:
             print('до отправки')
             data = self.network.send(send_move((x1, y1), pos_att1))
@@ -337,7 +342,7 @@ class Board:
         for i in range(10):
             checker.rect.x += delta_x
             checker.rect.y += delta_y
-            self.render(screen, self.my_color, self.network)
+            self.render(screen, self.my_color, self.network, self.sounds)
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
@@ -405,7 +410,7 @@ all_sprites = pygame.sprite.Group()
 board = None
 
 
-def online_run(network, MY_COLOR, color):
+def online_run(network, MY_COLOR, color, sounds):
     global screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
     try:
 
@@ -429,7 +434,7 @@ def online_run(network, MY_COLOR, color):
         board.load_sprites(all_sprites)
 
         screen.fill((0, 0, 0))
-        board.render(screen, MY_COLOR, network)
+        board.render(screen, MY_COLOR, network, sounds)
         all_sprites.draw(screen)
         pygame.display.flip()
         running = True
@@ -471,7 +476,7 @@ def online_run(network, MY_COLOR, color):
                 continue
 
             screen.fill((0, 0, 0))
-            board.render(screen, MY_COLOR, network)
+            board.render(screen, MY_COLOR, network, sounds)
             all_sprites.draw(screen)
             pygame.display.flip()
 

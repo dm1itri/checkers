@@ -4,7 +4,7 @@ from additional_functions.board import load_move, send_move
 from additional_functions.button import Button
 
 
-def dialog_run(text, main_font, click):
+def dialog_run(text, main_font, sounds):
     pygame.init()
     size = width, height = 500, 300
     fps = 30
@@ -34,7 +34,8 @@ def dialog_run(text, main_font, click):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for but in buttons:
                     if but.onclick(event.pos):
-                        click.play(0)
+                        if sounds['on_sounds']:
+                            sounds['click'].play(0)
                         text_btn = buttons[but]
                         if text_btn == 'Да':
                             return True

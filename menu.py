@@ -64,8 +64,13 @@ class Menu:
         sounds = {}
         click = pygame.mixer.Sound('additional_functions/data/click.wav')
         find_sound = pygame.mixer.Sound('additional_functions/data/find.wav')
+        move = pygame.mixer.Sound('additional_functions/data/move.wav')
+
         sounds['click'] = click
         sounds['find'] = find_sound
+        sounds['move'] = move
+        sounds['on_sounds'] = True
+        sounds['on_music'] = True
 
         clock = pygame.time.Clock()
         running = True
@@ -80,24 +85,26 @@ class Menu:
                     if event.button == 1:
                         for but in buttons:
                             if but.onclick(event.pos):
-                                click.play(0)
+                                if sounds['on_sounds']:
+                                    click.play(0)
                                 text_btn = buttons[but]
                                 if text_btn == 'Играть':
                                     data = search_game_run(self.main_font)
                                     if data:
-                                        sounds['find'].play(0)
+                                        if sounds['on_sounds']:
+                                            sounds['find'].play(0)
                                         network, my_color = data
                                         if dialog_run('Мы нашли игру,\nприсоединиться?',
-                                                      self.main_font, click):
+                                                      self.main_font, sounds):
                                             pygame.mixer.music.set_volume(0.05)
-                                            winner = online_run(network, my_color, 'white')
+                                            winner = online_run(network, my_color, 'white', sounds)
                                             pygame.mixer.music.set_volume(0.2)
                                             game_over_run(winner, self.main_font, sounds)
 
                                         else:
                                             network.send('end')
                                 elif text_btn == 'Настройки':
-                                    settings_run(self.main_font, click)
+                                    settings_run(self.main_font, sounds)
                     elif event.button == 3:
                         pass
 
