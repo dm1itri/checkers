@@ -499,3 +499,4 @@ def winner(MY_COLOR):
 def remove_spites(group):
     for sprite in group:
         sprite.kill()
+
