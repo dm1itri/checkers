@@ -205,7 +205,7 @@ class Board:
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
-        screen.blit(text, (self.cell_size * 4, 10))
+        screen.blit(text, (self.left, 10))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
@@ -217,11 +217,13 @@ class Board:
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
         font = pygame.font.Font(main_font, 17)
-        text = font.render('              '.join("ABCDEFGH"), True, (0, 0, 0))
-        screen.blit(text, (self.left + self.cell_size / 2, 40))
         for i in range(1, 9):
             text = font.render(str(i), True, (0, 0, 0))
             screen.blit(text, (self.left - 8, self.top + self.cell_size * (i - 0.5)))
+            screen.blit(text, (self.left + self.cell_size * self.width + 2, self.top + self.cell_size * (i - 0.5)))
+            text = font.render('ABCDEFGH'[i - 1], True, (0, 0, 0))
+            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top - 10))
+            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top + self.cell_size * self.height))
 
         for i in range(self.height):
             for j in range(self.width):
@@ -236,9 +238,6 @@ class Board:
                     checker = self.field[i][j]
                     checker.rect.x = self.left + self.cell_size * j
                     checker.rect.y = self.top + self.cell_size * i
-
-                    # if self.field[i][j].__class__.__name__ == 'Queen':
-                    #     checker.image = load_image("white_queen.png" if checker.color == WHITE else "black_queen.png")
 
         if self.mouse_coords:
             x, y = self.mouse_coords[0]

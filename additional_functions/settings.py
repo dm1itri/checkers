@@ -12,7 +12,7 @@ def mouse_coords(mouse_coords, sett):
             sett[2] = 75 if sett[2] == 75 else sett[2] + 5
     elif width * 0.075 <= x <= width * 0.125:
         if 0 <= y <= 0 + 40:
-            sett[0] = 0 if sett[0] == 0 else sett[0] - 10
+            sett[0] = 20 if sett[0] == 20 else sett[0] - 10
         elif height * 0.2 <= y <= height * 0.2 + 40:
             sett[1] = 40 if sett[1] == 40 else sett[1] - 10
         elif height * 0.4 <= y <= height * 0.4 + 40:
