@@ -1,14 +1,14 @@
 import sys
-import pygame
+from pygame import image, transform
 import os
 
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None, size=(50, 50)):
     fullname = os.path.join('additional_functions/data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
-    image = pygame.image.load(fullname)
+    im = image.load(fullname)
     # if colorkey is not None:
     #     image = image.convert()
     #     if colorkey == -1:
@@ -16,5 +16,5 @@ def load_image(name, colorkey=None):
     #     image.set_colorkey(colorkey)
     # else:
     #     image = image.convert_alpha()
-    image = pygame.transform.scale(image, (50, 50))
-    return image
+    im = transform.scale(im, size)
+    return im

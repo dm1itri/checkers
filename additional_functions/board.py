@@ -1,7 +1,6 @@
 import pygame
 from additional_functions.load_image import load_image
-import sys
-import copy
+
 
 WHITE = 'white'
 BLACK = 'black'
@@ -56,10 +55,10 @@ def check_wqueen(board):
 class Shapes(pygame.sprite.Sprite):
     # image = load_image("white.png")
 
-    def __init__(self, group, color):
+    def __init__(self, group, color, size):
         super().__init__(group)
         self.color = color
-        self.image = load_image("white.png" if color == WHITE else "black.png")
+        self.image = load_image("white.png" if color == WHITE else "black.png", size=size)
 
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -91,9 +90,9 @@ class Shapes(pygame.sprite.Sprite):
 
 
 class Queen(Shapes):
-    def __init__(self, group, color):
-        super().__init__(group, color)
-        self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
+    def __init__(self, group, color, size):
+        super().__init__(group, color, size)
+        self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png", size=size)
 
     def can_move(self, board, x, y, pos_att):
         sp_kill = []
@@ -158,41 +157,44 @@ class Board:
         self.width = width
         self.height = height
         self.field = [[None] * 8 for _ in range(8)]
-        self.field[0][1] = Usual(all_sprites, WHITE)
-        self.field[0][3] = Usual(all_sprites, WHITE)
-        self.field[0][5] = Usual(all_sprites, WHITE)
-        self.field[0][7] = Usual(all_sprites, WHITE)
-        self.field[1][0] = Usual(all_sprites, WHITE)
-        self.field[1][2] = Usual(all_sprites, WHITE)
-        self.field[1][4] = Usual(all_sprites, WHITE)
-        self.field[1][6] = Usual(all_sprites, WHITE)
-        self.field[2][1] = Usual(all_sprites, WHITE)
-        self.field[2][3] = Usual(all_sprites, WHITE)
-        self.field[2][5] = Usual(all_sprites, WHITE)
-        self.field[2][7] = Usual(all_sprites, WHITE)
-        self.field[5][0] = Usual(all_sprites, BLACK)
-        self.field[5][2] = Usual(all_sprites, BLACK)
-        self.field[5][4] = Usual(all_sprites, BLACK)
-        self.field[5][6] = Usual(all_sprites, BLACK)
-        self.field[6][1] = Usual(all_sprites, BLACK)
-        self.field[6][3] = Usual(all_sprites, BLACK)
-        self.field[6][5] = Usual(all_sprites, BLACK)
-        self.field[6][7] = Usual(all_sprites, BLACK)
-        self.field[7][0] = Usual(all_sprites, BLACK)
-        self.field[7][2] = Usual(all_sprites, BLACK)
-        self.field[7][4] = Usual(all_sprites, BLACK)
-        self.field[7][6] = Usual(all_sprites, BLACK)
+        with open('additional_functions/data/settings.txt') as f:
+            f = f.read()
+            self.left, self.top, self.cell_size = [int(i) for i in f.split()]
+
+        self.field[0][1] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[0][3] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[0][5] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[0][7] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[1][0] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[1][2] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[1][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[1][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[2][1] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[2][3] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[2][5] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[2][7] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[5][0] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[5][2] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[5][4] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[5][6] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[6][1] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[6][3] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[6][5] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[6][7] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[7][0] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[7][2] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[7][4] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[7][6] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
         # значения по умолчанию
-        self.left = 10
-        self.top = 10
-        self.cell_size = 70
+
         self.mouse_coords = []
 
     # настройка внешнего вида  (пока не тестировалось)
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
+    #def set_view(self, left, top, cell_size):
+        #self.left = left
+        #self.top = top if top > 30 else 30
+        #self.cell_size = cell_size
+        #return pygame.display.set_mode((self.left * 2 + self.cell_size * 8, self.top * 2 + self.cell_size * 8))
 
     def render(self, screen, my_color, network):
         self.my_color = my_color
@@ -203,7 +205,7 @@ class Board:
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
-        screen.blit(text, (130, 10))
+        screen.blit(text, (self.cell_size * 4, 10))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
@@ -305,10 +307,10 @@ class Board:
         sp_wq = check_wqueen(self.field)
         for i in sp_wq:
             self.field[7][i].kill()
-            self.field[7][i] = Queen(all_sprites, WHITE)
+            self.field[7][i] = Queen(all_sprites, WHITE, (self.cell_size, self.cell_size))
         for i in sp_bq:
             self.field[0][i].kill()
-            self.field[0][i] = Queen(all_sprites, BLACK)
+            self.field[0][i] = Queen(all_sprites, BLACK, (self.cell_size, self.cell_size))
             print(2)
 
         if mine:
@@ -393,7 +395,7 @@ board = None
 
 
 def online_run(network, MY_COLOR, color):
-    global screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
+    global board, screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
     try:
         COUNT_WHITE_KILLED = 0
         COUNT_BLACK_KILLED = 0
@@ -403,15 +405,16 @@ def online_run(network, MY_COLOR, color):
         flag_quit = False
 
         pygame.init()
-        size = 500, 500
+        # size = 500, 500
         # screen — холст, на котором нужно рисовать:
-        screen = pygame.display.set_mode(size)
+        # screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Шашки')
         clock = pygame.time.Clock()
-        all_sprites = pygame.sprite.Group()
+
 
         board = Board(8, 8)
-        board.set_view(50, 50, 50)
+        screen = pygame.display.set_mode((board.left * 2 + board.cell_size * 8, board.top * 2 + board.cell_size * 8))
+        all_sprites = pygame.sprite.Group()
         board.load_sprites(all_sprites)
 
         screen.fill((0, 0, 0))
