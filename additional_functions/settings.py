@@ -27,7 +27,7 @@ def mouse_coords(mouse_coords, sett):
             sett[3] = 0
         elif height * 0.4 <= y <= height * 0.4 + 40:
             sett[4] = 0
-    with open('data/settings.txt', 'w') as f:
+    with open('additional_functions/data/settings.txt', 'w') as f:
         f.write(' '.join(str(i) for i in sett))
 
 
@@ -39,7 +39,7 @@ def settings_run():
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Настройки')
     running = True
-    font = pygame.font.Font('fonts/main.ttf', 30)
+    font = pygame.font.Font('additional_functions/fonts/main.ttf', 30)
 
     while running:
         for event in pygame.event.get():
@@ -49,7 +49,7 @@ def settings_run():
                 if event.button == 1:
                     mouse_coords(event.pos, sett)
         screen.fill('white')
-        with open('data/settings.txt') as f:
+        with open('additional_functions/data/settings.txt') as f:
             sett = [int(i) for i in f.read().split()]
         sp = [f'Левый и правый отступ={sett[0]}', f'Верхний и нижний отступ={sett[1]}', f'Ширина клетки={sett[2]}',
               f'Подсветка ходов={"ON" if sett[3] else "OFF"}', f'Анимация хода={"ON" if sett[4] else "OFF"}']
