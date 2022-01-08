@@ -134,12 +134,12 @@ class Usual(Shapes):
 
         else:
             sp_kill = []
-            print('can_move: ', pos_att)
+            # print('can_move: ', pos_att)
             for i, j in pos_att:
-                print('wbrk')
+                # print('wbrk')
                 if (i == x + 2 or i == x - 2) and (j == y + 2 or j == y - 2) and board[j][i] is None:
                     kill = board[(j + y) // 2][(i + x) // 2]
-                    print('kill: ', (j + y) // 2, (i + x) // 2)
+                    # print('kill: ', (j + y) // 2, (i + x) // 2)
                     if kill is None:
                         return False
 
@@ -188,13 +188,6 @@ class Board:
         # значения по умолчанию
 
         self.mouse_coords = []
-
-    # настройка внешнего вида  (пока не тестировалось)
-    #def set_view(self, left, top, cell_size):
-        #self.left = left
-        #self.top = top if top > 30 else 30
-        #self.cell_size = cell_size
-        #return pygame.display.set_mode((self.left * 2 + self.cell_size * 8, self.top * 2 + self.cell_size * 8))
 
     def render(self, screen, my_color, network):
         self.my_color = my_color
@@ -278,11 +271,14 @@ class Board:
         if not rez:
             return False
         if rez == 1:
-            checker = self.field[y][x]
-            self.field[y][x] = None
-            self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
-            self.field[pos_att[0][1]][pos_att[0][0]] = checker
-
+            if self.check_attack():
+                print('cxyesdterfd')
+                checker = self.field[y][x]
+                self.field[y][x] = None
+                self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+                self.field[pos_att[0][1]][pos_att[0][0]] = checker
+            else:
+                return False
         elif len(rez) == len(pos_att):  # при атаке должно совпадать кол-во убранных шашек с кол-вом позиций атак
             checker = self.field[y][x]
             self.field[y][x] = None
@@ -329,6 +325,21 @@ class Board:
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
+
+    def check_attack(self):
+        for i in range(8):
+            for j in range(8):
+                checker = self.field[j][i]
+                if checker:
+                    if checker.color == COLOR:
+                        for i1 in range(8):
+                            for j1 in range(8):
+                                rez = checker.can_move(self.field, i, j, [(j1, i1)])
+                                if type(rez) == list:
+                                    if len(rez) == 1:
+                                        print(i, j, [(j1, i1)])
+                                        return False
+        return True
 
     def load_sprites(self, group):
         for lst_sprites in list(map(lambda x: list(filter(lambda y: y is not None, x)), self.field)):
@@ -476,14 +487,12 @@ def winner(MY_COLOR):
     if COUNT_BLACK_KILLED == 12:
         if MY_COLOR == WHITE:
             return True
-        else:
-            return False
+        return False
 
     if COUNT_WHITE_KILLED == 12:
         if MY_COLOR == BLACK:
             return True
-        else:
-            return False
+        return False
     return None
 
 
