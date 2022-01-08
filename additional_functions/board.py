@@ -159,7 +159,7 @@ class Board:
         self.field = [[None] * 8 for _ in range(8)]
         with open('additional_functions/data/settings.txt') as f:
             f = f.read()
-            self.left, self.top, self.cell_size = [int(i) for i in f.split()]
+            self.left, self.top, self.cell_size, self.illumination, self.animation_ = [int(i) for i in f.split()]
 
         self.field[0][1] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.field[0][3] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
@@ -238,13 +238,13 @@ class Board:
                 if self.field[y][x].color == COLOR:
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
-
-                    for i in range(self.height):
-                        for j in range(self.width):
-                            if self.field[y][x].can_move(self.field, x, y, ([j, i],)):
-                                screen.fill('green',
-                                            (self.left + self.cell_size * j, self.top + self.cell_size * i,
-                                             self.cell_size, self.cell_size))
+                    if self.illumination:
+                        for i in range(self.height):
+                            for j in range(self.width):
+                                if self.field[y][x].can_move(self.field, x, y, ([j, i],)):
+                                    screen.fill('green',
+                                                (self.left + self.cell_size * j, self.top + self.cell_size * i,
+                                                 self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att, mine):
         global COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
@@ -275,7 +275,8 @@ class Board:
                 print('cxyesdterfd')
                 checker = self.field[y][x]
                 self.field[y][x] = None
-                self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+                if self.animation_:
+                    self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
                 self.field[pos_att[0][1]][pos_att[0][0]] = checker
             else:
                 return False
@@ -289,7 +290,8 @@ class Board:
                 pos_att_i = pos_att[i]
                 self.field[rez_i[1]][rez_i[0]].kill()
                 self.field[rez_i[1]][rez_i[0]] = None
-                self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
+                if self.animation_:
+                    self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
             if COLOR == BLACK:
