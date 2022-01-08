@@ -35,22 +35,22 @@ def color_opponent():
     return BLACK
 
 
-def check_bqueen(board):  # проверка есть ли белые шашки расположенные на линии дамок
+def check_wqueen(board):  # проверка есть ли белые шашки расположенные на линии дамок
     sp = []
     for i in range(1, 8, 2):
         b = board[0][i]
         if b is not None:
-            if b.color == BLACK and b.__class__.__name__ == 'Usual':
+            if b.color == WHITE and b.__class__.__name__ == 'Usual':
                 sp.append(i)
     return sp
 
 
-def check_wqueen(board):
+def check_bqueen(board):
     sp = []
     for i in range(0, 7, 2):
         b = board[7][i]
         if b is not None:
-            if b.color == WHITE and b.__class__.__name__ == 'Usual':
+            if b.color == BLACK and b.__class__.__name__ == 'Usual':
                 sp.append(i)
     return sp
 
@@ -128,12 +128,12 @@ class Queen(Shapes):
 class Usual(Shapes):
     def can_move(self, board, x, y, pos_att):
         if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1\
-                and len(pos_att) == 1 and self.color == WHITE:
+                and len(pos_att) == 1 and self.color == BLACK:
             if board[pos_att[0][1]][pos_att[0][0]] is None:
                 return 1
 
         elif (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y - 1\
-                and len(pos_att) == 1 and self.color == BLACK:
+                and len(pos_att) == 1 and self.color == WHITE:
             if board[pos_att[0][1]][pos_att[0][0]] is None:
                 return 1
 
@@ -163,30 +163,30 @@ class Board:
         self.height = height
         self.field = [[None] * 8 for _ in range(8)]
 
-        self.field[0][1] = Usual(all_sprites, WHITE)
-        self.field[0][3] = Usual(all_sprites, WHITE)
-        self.field[0][5] = Usual(all_sprites, WHITE)
-        self.field[0][7] = Usual(all_sprites, WHITE)
-        self.field[1][0] = Usual(all_sprites, WHITE)
-        self.field[1][2] = Usual(all_sprites, WHITE)
-        self.field[1][4] = Usual(all_sprites, WHITE)
-        self.field[1][6] = Usual(all_sprites, WHITE)
-        self.field[2][1] = Usual(all_sprites, WHITE)
-        self.field[2][3] = Usual(all_sprites, WHITE)
-        self.field[2][5] = Usual(all_sprites, WHITE)
-        self.field[2][7] = Usual(all_sprites, WHITE)
-        self.field[5][0] = Usual(all_sprites, BLACK)
-        self.field[5][2] = Usual(all_sprites, BLACK)
-        self.field[5][4] = Usual(all_sprites, BLACK)
-        self.field[5][6] = Usual(all_sprites, BLACK)
-        self.field[6][1] = Usual(all_sprites, BLACK)
-        self.field[6][3] = Usual(all_sprites, BLACK)
-        self.field[6][5] = Usual(all_sprites, BLACK)
-        self.field[6][7] = Usual(all_sprites, BLACK)
-        self.field[7][0] = Usual(all_sprites, BLACK)
-        self.field[7][2] = Usual(all_sprites, BLACK)
-        self.field[7][4] = Usual(all_sprites, BLACK)
-        self.field[7][6] = Usual(all_sprites, BLACK)
+        self.field[0][1] = Usual(all_sprites, BLACK)
+        self.field[0][3] = Usual(all_sprites, BLACK)
+        self.field[0][5] = Usual(all_sprites, BLACK)
+        self.field[0][7] = Usual(all_sprites, BLACK)
+        self.field[1][0] = Usual(all_sprites, BLACK)
+        self.field[1][2] = Usual(all_sprites, BLACK)
+        self.field[1][4] = Usual(all_sprites, BLACK)
+        self.field[1][6] = Usual(all_sprites, BLACK)
+        self.field[2][1] = Usual(all_sprites, BLACK)
+        self.field[2][3] = Usual(all_sprites, BLACK)
+        self.field[2][5] = Usual(all_sprites, BLACK)
+        self.field[2][7] = Usual(all_sprites, BLACK)
+        self.field[5][0] = Usual(all_sprites, WHITE)
+        self.field[5][2] = Usual(all_sprites, WHITE)
+        self.field[5][4] = Usual(all_sprites, WHITE)
+        self.field[5][6] = Usual(all_sprites, WHITE)
+        self.field[6][1] = Usual(all_sprites, WHITE)
+        self.field[6][3] = Usual(all_sprites, WHITE)
+        self.field[6][5] = Usual(all_sprites, WHITE)
+        self.field[6][7] = Usual(all_sprites, WHITE)
+        self.field[7][0] = Usual(all_sprites, WHITE)
+        self.field[7][2] = Usual(all_sprites, WHITE)
+        self.field[7][4] = Usual(all_sprites, WHITE)
+        self.field[7][6] = Usual(all_sprites, WHITE)
         # значения по умолчанию
         self.left = 10
         self.top = 10
@@ -319,12 +319,13 @@ class Board:
             return False
         sp_bq = check_bqueen(self.field)
         sp_wq = check_wqueen(self.field)
-        for i in sp_wq:
-            self.field[7][i].kill()
-            self.field[7][i] = Queen(all_sprites, WHITE)
+        print(sp_wq, sp_bq)
         for i in sp_bq:
+            self.field[7][i].kill()
+            self.field[7][i] = Queen(all_sprites, BLACK)
+        for i in sp_wq:
             self.field[0][i].kill()
-            self.field[0][i] = Queen(all_sprites, BLACK)
+            self.field[0][i] = Queen(all_sprites, WHITE)
             print(2)
         if mine and self.network is not None:
             print('до отправки')

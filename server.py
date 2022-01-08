@@ -90,8 +90,12 @@ class ThreadMain(Thread):
                             break
                         else:
                             if self.p == 0:
+                                move = load_move(data)
+                                print(move)
                                 game.p1Move = load_move(data)
                             else:
+                                move = load_move(data)
+                                print(move)
                                 game.p2Move = load_move(data)
                             COLOR = WHITE if COLOR == BLACK else BLACK
                             reply = '-'.encode()
