@@ -5,7 +5,7 @@ from additional_functions.board import load_move, send_move
 from additional_functions.load_image import load_image
 
 
-def search_game_run(main_font):
+def search_game_run(main_font, sounds):
     pygame.init()
     size = width, height = 500, 500
     fps = 30
@@ -29,8 +29,11 @@ def search_game_run(main_font):
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
                 return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    sounds['click'].play(0)
+                    return False
         screen.fill('white')
         screen.blit(text, (width // 2 - text.get_size()[0] // 2, height // 2 - text.get_size()[1] // 2 - 80))
 

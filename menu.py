@@ -1,9 +1,12 @@
 import pygame
+from random import randrange
+
 from additional_functions.button import Button
 from additional_functions.board import online_run, offline_run
 from additional_functions.settings import settings_run
-from additional_functions.particle import create_particles, part_group
+from additional_functions.particle import create_particles
 
+from additional_functions.load_image import load_image
 from additional_functions.search_game import search_game_run
 from additional_functions.dialog_win import dialog_run
 from additional_functions.game_over import game_over_run
@@ -31,6 +34,8 @@ class Menu:
         pygame.display.set_caption('Меню')
         clock = pygame.time.Clock()
         buttons_group = pygame.sprite.Group()
+        part_group = pygame.sprite.Group()
+        background = load_image('main_background.jpg')
         screen.fill(pygame.color.Color('white'))
 
         main_text = self.text(self.main_font, 50, 'Шашки Онлайн', 'black')
@@ -45,7 +50,7 @@ class Menu:
             buttons[btn] = texts[i - 1]
 
         # добваление музыки
-        pygame.mixer.music.load('additional_functions/data/main_sound.mp3')
+        pygame.mixer.music.load('additional_functions/data/main_s.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1, 0, 10)
 
@@ -62,6 +67,8 @@ class Menu:
 
         clock = pygame.time.Clock()
         running = True
+
+        count_fps = 0
         while running:
             pygame.display.set_caption('Меню')
             size = width, height = 700, 500
@@ -80,7 +87,7 @@ class Menu:
                                 if text_btn == 'Играть':
                                     out = on_off_run(self.main_font, sounds)
                                     if out == 'online':
-                                        data = search_game_run(self.main_font)
+                                        data = search_game_run(self.main_font, sounds)
                                         if data:
                                             if sounds['on_sounds']:
                                                 sounds['find'].play(0)
@@ -100,13 +107,17 @@ class Menu:
                                     settings_run(self.main_font, sounds)
                     elif event.button == 3:
                         pass
+            count_fps += 1
 
             screen.fill(pygame.color.Color('white'))
+            part_group.draw(screen)
+            part_group.update()
             screen.blit(main_text, (width // 2 - (main_text.get_size()[0] // 2), 20))
             buttons_group.draw(screen)
             buttons_group.update()
-            part_group.draw(screen)
-            part_group.update()
+
+            if count_fps % 30 == 0:
+                create_particles((randrange(0, width), -50), part_group)
 
             pygame.display.flip()
             clock.tick(fps)

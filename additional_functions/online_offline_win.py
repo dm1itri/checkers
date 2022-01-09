@@ -1,5 +1,8 @@
 import pygame
+from random import randrange
+
 from additional_functions.button import Button
+from additional_functions.particle import create_particles
 
 
 def on_off_run(main_font, sounds):
@@ -9,7 +12,9 @@ def on_off_run(main_font, sounds):
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Шашки')
     buttons_group = pygame.sprite.Group()
+    part_group = pygame.sprite.Group()
     clock = pygame.time.Clock()
+    fps = 60
     running = True
 
     texts = {i[0]: i[1] for i in enumerate(['Онлайн игра', 'Оффлайн игра'])}
@@ -22,6 +27,7 @@ def on_off_run(main_font, sounds):
 
     main_text = _text(main_font, 50, 'Выбор', 'black')
 
+    count_fps = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -35,12 +41,28 @@ def on_off_run(main_font, sounds):
                         if text_btn == 'Онлайн игра':
                             return 'online'
                         return 'offline'
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    sounds['click'].play(0)
+
+        count_fps += 1
+
         screen.fill('white')
+
+        part_group.draw(screen)
+        part_group.update()
+
         screen.blit(main_text, (width // 2 - (main_text.get_size()[0] // 2), 20))
 
         buttons_group.draw(screen)
         buttons_group.update()
+
+        if count_fps % 60 == 0:
+            create_particles((randrange(0, width), -50), part_group)
+
         pygame.display.flip()
+        clock.tick(fps)
 
 
 def _text(font, size, text, color):

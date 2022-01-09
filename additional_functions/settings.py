@@ -1,5 +1,8 @@
 import pygame
+from random import randrange
+
 from additional_functions.button import Button
+from additional_functions.particle import create_particles
 
 
 def settings_run(main_font, sounds):
@@ -9,7 +12,9 @@ def settings_run(main_font, sounds):
     screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Шашки')
     buttons_group = pygame.sprite.Group()
+    part_group = pygame.sprite.Group()
     clock = pygame.time.Clock()
+    fps = 60
     running = True
 
     texts = {i[0]: i[1] for i in enumerate(['Включено' if sounds['on_music'] else 'Выключено',
@@ -26,6 +31,7 @@ def settings_run(main_font, sounds):
 
     text = 'Музыка\nЗвуки'
 
+    count_fps = 0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -69,14 +75,32 @@ def settings_run(main_font, sounds):
                                          but.win,
                                          buttons_group)
                             buttons[btn] = text_btn
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    sounds['click'].play(0)
+
+
+        count_fps += 1
+
         screen.fill('white')
+
+        part_group.draw(screen)
+        part_group.update()
+
         lines = text.splitlines()
         for i, l in enumerate(lines):
             screen.blit(_text(main_font, 50, l, 'black'), (40, 30 + 80 * i))
 
         buttons_group.draw(screen)
         buttons_group.update()
+
+        if count_fps % 60 == 0:
+            create_particles((randrange(0, width), -50), part_group)
+
         pygame.display.flip()
+        clock.tick(fps)
 
 
 def _text(font, size, text, color):
