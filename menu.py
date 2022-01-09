@@ -45,7 +45,7 @@ class Menu:
             buttons[btn] = texts[i - 1]
 
         # добваление музыки
-        pygame.mixer.music.load('additional_functions/data/main_s.mp3')
+        pygame.mixer.music.load('additional_functions/data/main_sound.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1, 0, 10)
 

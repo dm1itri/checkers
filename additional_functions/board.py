@@ -99,7 +99,7 @@ class Queen(Shapes):
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
         self.image = pygame.transform.scale(self.image, (50, 50))
 
-    def can_move(self, board, x, y, pos_att):
+    def can_move(self, board, x, y, pos_att, mine):
         sp_kill = []
         for i, j in pos_att:
             sp_kill1 = []
@@ -108,7 +108,7 @@ class Queen(Shapes):
                     iv = -i1 if j < y else i1
                     ih = -i1 if i < x else i1
                     if board[y + iv][x + ih] is not None:
-                        if board[y + iv][x + ih].color == COLOR:
+                        if board[y + iv][x + ih].color == WHITE and mine:
                             return False
                         sp_kill1.append([x + ih, y + iv])
 
@@ -126,7 +126,7 @@ class Queen(Shapes):
 
 
 class Usual(Shapes):
-    def can_move(self, board, x, y, pos_att):
+    def can_move(self, board, x, y, pos_att, mine):
         if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1\
                 and len(pos_att) == 1 and self.color == BLACK:
             if board[pos_att[0][1]][pos_att[0][0]] is None:
@@ -148,7 +148,8 @@ class Usual(Shapes):
                     if kill is None:
                         return False
 
-                    if kill.color == COLOR:
+                    if kill.color == WHITE and mine:
+                        print(kill.color, WHITE)
                         return False
 
                     sp_kill.append([(i + x) // 2, (j + y) // 2])
@@ -210,7 +211,7 @@ class Board:
         font = pygame.font.Font(None, 40)
 
         font = pygame.font.Font(main_font, 35)
-        text = font.render(f"{'Ваш ход' if COLOR == my_color else 'Ход противника'}", True, (255, 255, 255))
+        text = font.render(f"{'Ваш ход' if COLOR == WHITE else 'Ход противника'}", True, (255, 255, 255))
         screen.blit(text, (500 // 2 - (text.get_size()[0] // 2), 10))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
@@ -222,7 +223,7 @@ class Board:
         text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
-        text = font.render(f"Вы играете за {'белых' if my_color == WHITE else 'черных'}", True, (255, 255, 255))
+        text = font.render(f"Вы играете за белых", True, (255, 255, 255))
         screen.blit(text,
                     (500 // 2 - (text.get_size()[0] // 2), self.top + self.cell_size * self.height + 50))
 
@@ -255,13 +256,13 @@ class Board:
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
             if self.field[y][x]:
-                if self.field[y][x].color == self.my_color:
+                if self.field[y][x].color == WHITE:
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
 
                     for i in range(self.height):
                         for j in range(self.width):
-                            if self.field[y][x].can_move(self.field, x, y, ([j, i],)):
+                            if self.field[y][x].can_move(self.field, x, y, ([j, i],), True):
                                 screen.fill('green',
                                             (self.left + self.cell_size * j, self.top + self.cell_size * i,
                                              self.cell_size, self.cell_size))
@@ -276,18 +277,14 @@ class Board:
             if i > 7 or i < 0 or j < 0 or j > 7:
                 return False
 
-        print(x, y, pos_att)
         s = self.field[y][x]
-        print(self.field)
-        print('вошел в move', s)
 
         if s is None:
             return False
-        if s.color != self.my_color and mine:
+        if s.color != WHITE and mine:
             return False
 
-        rez = s.can_move(self.field, x, y, pos_att)
-        print(rez)
+        rez = s.can_move(self.field, x, y, pos_att, mine)
         if not rez:
             return False
         if rez == 1:
@@ -315,11 +312,11 @@ class Board:
                 COUNT_WHITE_KILLED += len(rez)
             else:
                 COUNT_BLACK_KILLED += len(rez)
+            print(COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED)
         else:
             return False
         sp_bq = check_bqueen(self.field)
         sp_wq = check_wqueen(self.field)
-        print(sp_wq, sp_bq)
         for i in sp_bq:
             self.field[7][i].kill()
             self.field[7][i] = Queen(all_sprites, BLACK)
@@ -328,9 +325,7 @@ class Board:
             self.field[0][i] = Queen(all_sprites, WHITE)
             print(2)
         if mine and self.network is not None:
-            print('до отправки')
             data = self.network.send(send_move((x1, y1), pos_att1))
-            print('после отправки')
         return True
 
     def animation(self, checker, x, y, x1, y1):
@@ -421,7 +416,8 @@ def online_run(network, MY_COLOR, color, sounds):
 
         COUNT_WHITE_KILLED = 0
         COUNT_BLACK_KILLED = 0
-        COLOR = color
+        COLOR = MY_COLOR
+
 
         flag_winner = None
         flag_quit = False
@@ -451,26 +447,24 @@ def online_run(network, MY_COLOR, color, sounds):
                     running = False
                     flag_quit = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if COLOR == MY_COLOR:
+                    if COLOR == WHITE:
                         if event.button == 1:
                             board.get_click(event.pos)
                         elif event.button == 3:
                             board.mouse_coords.append(board.get_cell(event.pos))
-                    print(board.mouse_coords)
-
+            print(COLOR)
             count_fps += 1
             if count_fps % 100 == 0:
                 data = network.send('get_move')
-                print(data)
                 if data == 'end':
-                    print('вышел', COUNT_WHITE_KILLED, COUNT_BLACK_KILLED)
                     break
 
-                elif COLOR != MY_COLOR:
+                elif COLOR != WHITE:
                     if count_fps % 100 == 0:
                         if data is not None and data != 'None' and data != '-':
                             if load_move(data):
                                 last, new = load_move(data)
+
                                 board.move(last[0], last[1], new, False)
                                 COLOR = color_opponent()
 
@@ -537,16 +531,9 @@ def offline_run(sounds):
 
 def winner(MY_COLOR):
     if COUNT_BLACK_KILLED == 12:
-        if MY_COLOR == WHITE:
-            return True
-        else:
-            return False
-
+        return True
     if COUNT_WHITE_KILLED == 12:
-        if MY_COLOR == BLACK:
-            return True
-        else:
-            return False
+        return False
     return None
 
 
