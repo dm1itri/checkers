@@ -5,16 +5,47 @@ from additional_functions.button import Button
 from additional_functions.particle import create_particles
 
 
+def mouse_coords(mouse_coords, sett):
+    x, y = mouse_coords[0], mouse_coords[1]
+    if width * 0.875 <= x <= width * 0.925:
+        if 0 <= y <= 0 + 40:
+            sett[0] = 100 if sett[0] == 100 else sett[0] + 10
+        elif height * 0.1 <= y <= height * 0.1 + 40:
+            sett[1] = 100 if sett[1] == 100 else sett[1] + 10
+        elif height * 0.2 <= y <= height * 0.2 + 40:
+            sett[2] = 75 if sett[2] == 75 else sett[2] + 5
+        elif height * 0.3 <= y <= height * 0.3 + 40:
+            sett[3] = 1
+        elif height * 0.4 <= y <= height * 0.4 + 40:
+            sett[4] = 1
+    elif width * 0.8 <= x <= width * 0.85:
+        if 0 <= y <= 0 + 40:
+            sett[0] = 20 if sett[0] == 20 else sett[0] - 10
+        elif height * 0.1 <= y <= height * 0.1 + 40:
+            sett[1] = 40 if sett[1] == 40 else sett[1] - 10
+        elif height * 0.2 <= y <= height * 0.2 + 40:
+            sett[2] = 30 if sett[2] == 30 else sett[2] - 5
+        elif height * 0.3 <= y <= height * 0.3 + 40:
+            sett[3] = 0
+        elif height * 0.4 <= y <= height * 0.4 + 40:
+            sett[4] = 0
+
+    with open('data/settings.txt', 'w') as f:
+        f.write(' '.join(str(i) for i in sett))
+
+
 def settings_run(main_font, sounds):
+    global width, height
     pygame.init()
-    size = width, height = 500, 500
+    size = width, height = 700, 500
     # screen — холст, на котором нужно рисовать:
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('Шашки')
+    pygame.display.set_caption('Настройки')
     buttons_group = pygame.sprite.Group()
     part_group = pygame.sprite.Group()
     clock = pygame.time.Clock()
     fps = 60
+    font = pygame.font.Font('additional_functions/fonts/main.ttf', 30)
     running = True
 
     texts = {i[0]: i[1] for i in enumerate(['Включено' if sounds['on_music'] else 'Выключено',
@@ -23,9 +54,9 @@ def settings_run(main_font, sounds):
     for i in range(1, len(texts) + 1):
         text = _text(main_font, 35, texts[i - 1], '#c15c0f')
         if texts[i - 1].startswith('Включено'):
-            btn = Button(240, 80 * i - 50, 60, 190, text, '#a04c0b', screen, buttons_group)
+            btn = Button(width * 0.1 + 200, 80 * i - 50, 60, 190, text, '#a04c0b', screen, buttons_group)
         else:
-            btn = Button(240, 80 * i - 50, 60, 210, text, '#a04c0b', screen, buttons_group)
+            btn = Button(width * 0.1 + 200, 80 * i - 50, 60, 210, text, '#a04c0b', screen, buttons_group)
 
         buttons[btn] = texts[i - 1]
 
@@ -51,27 +82,27 @@ def settings_run(main_font, sounds):
 
                                 text_render_sound = _text(main_font, 35, 'Выключено', '#c15c0f')
                                 text_btn = 'Выключено'
-                                width = 210
+                                width_btn = 210
                             elif text_btn == 'Выключено':
                                 pygame.mixer.music.unpause()
                                 sounds['on_music'] = True
 
                                 text_render_sound = _text(main_font, 35, 'Включено', '#c15c0f')
                                 text_btn = 'Включено'
-                                width = 190
+                                width_btn = 190
                             elif text_btn == 'Включено ':
                                 sounds['on_sounds'] = False
 
                                 text_render_sound = _text(main_font, 35, 'Выключено', '#c15c0f')
                                 text_btn = 'Выключено '
-                                width = 210
+                                width_btn = 210
                             elif text_btn == 'Выключено ':
                                 sounds['on_sounds'] = True
 
                                 text_render_sound = _text(main_font, 35, 'Включено', '#c15c0f')
                                 text_btn = 'Включено '
-                                width = 190
-                            btn = Button(but.rect.x, but.rect.y, but.height, width, text_render_sound, but.color,
+                                width_btn = 190
+                            btn = Button(but.rect.x, but.rect.y, but.height, width_btn, text_render_sound, but.color,
                                          but.win,
                                          buttons_group)
                             buttons[btn] = text_btn
@@ -80,7 +111,6 @@ def settings_run(main_font, sounds):
                 if event.key == pygame.K_ESCAPE:
                     running = False
                     sounds['click'].play(0)
-
 
         count_fps += 1
 
@@ -91,7 +121,21 @@ def settings_run(main_font, sounds):
 
         lines = text.splitlines()
         for i, l in enumerate(lines):
-            screen.blit(_text(main_font, 50, l, 'black'), (40, 30 + 80 * i))
+            screen.blit(_text(main_font, 50, l, 'black'), (width * 0.1, 30 + 80 * i))
+
+        with open('additional_functions/data/settings.txt') as f:
+            sett = [int(i) for i in f.read().split()]
+        sp = [f'Левый и правый отступ={sett[0]}', f'Верхний и нижний отступ={sett[1]}', f'Ширина клетки={sett[2]}',
+              f'Подсветка ходов={"ON" if sett[3] else "OFF"}', f'Анимация хода={"ON" if sett[4] else "OFF"}']
+        for i, t in enumerate(sp):
+            text1 = font.render(t, True, 'black')
+            screen.blit(text1, (width * 0.1, height * 0.1 * i + 220))
+            pygame.draw.line(screen, '#a04c0b', (width * 0.9, height * 0.1 * i + 220), (width * 0.9, height * 0.1 * i + 40 + 220),
+                             width=5)
+            pygame.draw.line(screen, '#a04c0b', (width * 0.875, height * 0.1 * i + 20 + 220),
+                             (width * 0.925, height * 0.1 * i + 20 + 220), width=5)
+            pygame.draw.line(screen, '#a04c0b', (width * 0.8, height * 0.1 * i + 20 + 220),
+                             (width * 0.85, height * 0.1 * i + 20 + 220), width=5)
 
         buttons_group.draw(screen)
         buttons_group.update()

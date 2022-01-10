@@ -56,13 +56,12 @@ def check_bqueen(board):
 
 
 class Shapes(pygame.sprite.Sprite):
-    # image = load_image("white.png")
 
-    def __init__(self, group, color):
+    def __init__(self, group, color, size):
         super().__init__(group)
         self.color = color
         self.image = load_image("white.png" if color == WHITE else "black.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = pygame.transform.scale(self.image, size)
 
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -94,10 +93,10 @@ class Shapes(pygame.sprite.Sprite):
 
 
 class Queen(Shapes):
-    def __init__(self, group, color):
-        super().__init__(group, color)
+    def __init__(self, group, color, size):
+        super().__init__(group, color, size)
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.image = pygame.transform.scale(self.image, size)
 
     def can_move(self, board, x, y, pos_att, mine):
         sp_kill = []
@@ -164,30 +163,34 @@ class Board:
         self.height = height
         self.field = [[None] * 8 for _ in range(8)]
 
-        self.field[0][1] = Usual(all_sprites, BLACK)
-        self.field[0][3] = Usual(all_sprites, BLACK)
-        self.field[0][5] = Usual(all_sprites, BLACK)
-        self.field[0][7] = Usual(all_sprites, BLACK)
-        self.field[1][0] = Usual(all_sprites, BLACK)
-        self.field[1][2] = Usual(all_sprites, BLACK)
-        self.field[1][4] = Usual(all_sprites, BLACK)
-        self.field[1][6] = Usual(all_sprites, BLACK)
-        self.field[2][1] = Usual(all_sprites, BLACK)
-        self.field[2][3] = Usual(all_sprites, BLACK)
-        self.field[2][5] = Usual(all_sprites, BLACK)
-        self.field[2][7] = Usual(all_sprites, BLACK)
-        self.field[5][0] = Usual(all_sprites, WHITE)
-        self.field[5][2] = Usual(all_sprites, WHITE)
-        self.field[5][4] = Usual(all_sprites, WHITE)
-        self.field[5][6] = Usual(all_sprites, WHITE)
-        self.field[6][1] = Usual(all_sprites, WHITE)
-        self.field[6][3] = Usual(all_sprites, WHITE)
-        self.field[6][5] = Usual(all_sprites, WHITE)
-        self.field[6][7] = Usual(all_sprites, WHITE)
-        self.field[7][0] = Usual(all_sprites, WHITE)
-        self.field[7][2] = Usual(all_sprites, WHITE)
-        self.field[7][4] = Usual(all_sprites, WHITE)
-        self.field[7][6] = Usual(all_sprites, WHITE)
+        with open('additional_functions/data/settings.txt') as f:
+            f = f.read()
+            self.left, self.top, self.cell_size, self.illumination, self.animation_ = [int(i) for i in f.split()]
+
+        self.field[0][1] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[0][3] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[0][5] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[0][7] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[1][0] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[1][2] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[1][4] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[1][6] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[2][1] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[2][3] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[2][5] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[2][7] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
+        self.field[5][0] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[5][2] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[5][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[5][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[6][1] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[6][3] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[6][5] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[6][7] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[7][0] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[7][2] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[7][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
+        self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         # значения по умолчанию
         self.left = 10
         self.top = 10
@@ -195,10 +198,10 @@ class Board:
         self.mouse_coords = []
 
     # настройка внешнего вида  (пока не тестировалось)
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
+    # def set_view(self, left, top, cell_size):
+    #     self.left = left
+    #     self.top = top
+    #     self.cell_size = cell_size
 
     def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
@@ -208,11 +211,10 @@ class Board:
         screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
         screen.fill('#ac9362', (
             self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
-        font = pygame.font.Font(None, 40)
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == WHITE else 'Ход противника'}", True, (255, 255, 255))
-        screen.blit(text, (500 // 2 - (text.get_size()[0] // 2), 10))
+        screen.blit(text, (self.left, 10))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
@@ -223,18 +225,14 @@ class Board:
         text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
-        text = font.render(f"Вы играете за белых", True, (255, 255, 255))
-        screen.blit(text,
-                    (500 // 2 - (text.get_size()[0] // 2), self.top + self.cell_size * self.height + 50))
-
-        font = pygame.font.Font(None, 17)
-        text = font.render(
-            f"A{''.join(' ' for i in range(13))}B              C              D              E              F              G              H",
-            True, (0, 0, 0))
-        screen.blit(text, (self.left + self.cell_size / 2, 40))
+        font = pygame.font.Font(main_font, 17)
         for i in range(1, 9):
             text = font.render(str(i), True, (0, 0, 0))
             screen.blit(text, (self.left - 8, self.top + self.cell_size * (i - 0.5)))
+            screen.blit(text, (self.left + self.cell_size * self.width + 2, self.top + self.cell_size * (i - 0.5)))
+            text = font.render('ABCDEFGH'[i - 1], True, (0, 0, 0))
+            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top - 10))
+            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top + self.cell_size * self.height))
 
         for i in range(self.height):
             for j in range(self.width):
@@ -250,9 +248,6 @@ class Board:
                     checker.rect.x = self.left + self.cell_size * j
                     checker.rect.y = self.top + self.cell_size * i
 
-                    # if self.field[i][j].__class__.__name__ == 'Queen':
-                    #     checker.image = load_image("white_queen.png" if checker.color == WHITE else "black_queen.png")
-
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
             if self.field[y][x]:
@@ -260,12 +255,13 @@ class Board:
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
 
-                    for i in range(self.height):
-                        for j in range(self.width):
-                            if self.field[y][x].can_move(self.field, x, y, ([j, i],), True):
-                                screen.fill('green',
-                                            (self.left + self.cell_size * j, self.top + self.cell_size * i,
-                                             self.cell_size, self.cell_size))
+                    if self.illumination:
+                        for i in range(self.height):
+                            for j in range(self.width):
+                                if self.field[y][x].can_move(self.field, x, y, ([j, i],), True):
+                                    screen.fill('green',
+                                                (self.left + self.cell_size * j, self.top + self.cell_size * i,
+                                                 self.cell_size, self.cell_size))
 
     def move(self, x, y, pos_att, mine):
         global COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
@@ -298,7 +294,8 @@ class Board:
                 print('cxyesdterfd')
                 checker = self.field[y][x]
                 self.field[y][x] = None
-                self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+                if self.animation_:
+                    self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
                 self.field[pos_att[0][1]][pos_att[0][0]] = checker
             else:
                 return False
@@ -314,7 +311,8 @@ class Board:
                 self.field[rez_i[1]][rez_i[0]].kill()
                 self.field[rez_i[1]][rez_i[0]] = None
 
-                self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
+                if self.animation_:
+                    self.animation(checker, x, y, pos_att_i[0], pos_att_i[1])
                 x, y = pos_att_i
             self.field[pos_att[-1][1]][pos_att[-1][0]] = checker
             if COLOR == BLACK:
@@ -328,10 +326,10 @@ class Board:
         sp_wq = check_wqueen(self.field)
         for i in sp_bq:
             self.field[7][i].kill()
-            self.field[7][i] = Queen(all_sprites, BLACK)
+            self.field[7][i] = Queen(all_sprites, BLACK, (self.cell_size, self.cell_size))
         for i in sp_wq:
             self.field[0][i].kill()
-            self.field[0][i] = Queen(all_sprites, WHITE)
+            self.field[0][i] = Queen(all_sprites, BLACK, (self.cell_size, self.cell_size))
             print(2)
         if mine and self.network is not None:
             data = self.network.send(send_move((x1, y1), pos_att1))
@@ -435,7 +433,7 @@ board = None
 
 
 def online_run(network, MY_COLOR, color, sounds):
-    global screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
+    global board, screen, all_sprites, clock, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
     try:
 
         COUNT_WHITE_KILLED = 0
@@ -446,15 +444,15 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        size = 500, 550
+        # size = 500, 550
         # screen — холст, на котором нужно рисовать:
-        screen = pygame.display.set_mode(size)
+        # screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Шашки')
         clock = pygame.time.Clock()
-        all_sprites = pygame.sprite.Group()
 
         board = Board(8, 8)
-        board.set_view(50, 50, 50)
+        screen = pygame.display.set_mode((board.left * 2 + board.cell_size * 8, board.top * 2 + board.cell_size * 8))
+        all_sprites = pygame.sprite.Group()
         board.load_sprites(all_sprites)
 
         screen.fill((0, 0, 0))
