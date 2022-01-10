@@ -90,9 +90,15 @@ class ThreadMain(Thread):
                             break
                         else:
                             if self.p == 0:
-                                game.p1Move = load_move(data)
+                                move = load_move(data)
+                                move = (7 - move[0][0], 7 - move[0][1]),\
+                                       list(map(lambda x: (7 - x[0], 7 - x[1]), move[1]))
+                                game.p1Move = move
                             else:
-                                game.p2Move = load_move(data)
+                                move = load_move(data)
+                                move = (7 - move[0][0], 7 - move[0][1]),\
+                                       list(map(lambda x: (7 - x[0], 7 - x[1]), move[1]))
+                                game.p2Move = move
                             COLOR = WHITE if COLOR == BLACK else BLACK
                             reply = '-'.encode()
 
