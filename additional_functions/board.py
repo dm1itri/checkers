@@ -288,11 +288,20 @@ class Board:
         if not rez:
             return False
         if rez == 1:
-            checker = self.field[y][x]
-            self.field[y][x] = None
+            # checker = self.field[y][x]
+            # self.field[y][x] = None
+            #
+            # self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+            # self.field[pos_att[0][1]][pos_att[0][0]] = checker
 
-            self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
-            self.field[pos_att[0][1]][pos_att[0][0]] = checker
+            if self.check_attack(mine):
+                print('cxyesdterfd')
+                checker = self.field[y][x]
+                self.field[y][x] = None
+                self.animation(checker, x, y, pos_att[0][0], pos_att[0][1])
+                self.field[pos_att[0][1]][pos_att[0][0]] = checker
+            else:
+                return False
 
         elif len(rez) == len(pos_att):  # при атаке должно совпадать кол-во убранных шашек с кол-вом позиций атак
             checker = self.field[y][x]
@@ -326,6 +335,21 @@ class Board:
             print(2)
         if mine and self.network is not None:
             data = self.network.send(send_move((x1, y1), pos_att1))
+        return True
+
+    def check_attack(self, mine):
+        for i in range(8):
+            for j in range(8):
+                checker = self.field[j][i]
+                if checker:
+                    if checker.color == WHITE and mine:
+                        for i1 in range(8):
+                            for j1 in range(8):
+                                rez = checker.can_move(self.field, i, j, [(j1, i1)], mine)
+                                if type(rez) == list:
+                                    if len(rez) == 1:
+                                        print(i, j, [(j1, i1)])
+                                        return False
         return True
 
     def animation(self, checker, x, y, x1, y1):
@@ -417,7 +441,6 @@ def online_run(network, MY_COLOR, color, sounds):
         COUNT_WHITE_KILLED = 0
         COUNT_BLACK_KILLED = 0
         COLOR = MY_COLOR
-
 
         flag_winner = None
         flag_quit = False

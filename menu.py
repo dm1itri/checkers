@@ -35,7 +35,6 @@ class Menu:
         clock = pygame.time.Clock()
         buttons_group = pygame.sprite.Group()
         part_group = pygame.sprite.Group()
-        background = load_image('main_background.jpg')
         screen.fill(pygame.color.Color('white'))
 
         main_text = self.text(self.main_font, 50, 'Шашки Онлайн', 'black')
