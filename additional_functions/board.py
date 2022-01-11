@@ -191,10 +191,6 @@ class Board:
         self.field[7][2] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.field[7][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
-        # значения по умолчанию
-        self.left = 10
-        self.top = 10
-        self.cell_size = 70
         self.mouse_coords = []
 
     # настройка внешнего вида  (пока не тестировалось)
@@ -329,7 +325,7 @@ class Board:
             self.field[7][i] = Queen(all_sprites, BLACK, (self.cell_size, self.cell_size))
         for i in sp_wq:
             self.field[0][i].kill()
-            self.field[0][i] = Queen(all_sprites, BLACK, (self.cell_size, self.cell_size))
+            self.field[0][i] = Queen(all_sprites, WHITE, (self.cell_size, self.cell_size))
             print(2)
         if mine and self.network is not None:
             data = self.network.send(send_move((x1, y1), pos_att1))
@@ -400,6 +396,7 @@ class Board:
                 self.mouse_coords = []
             else:
                 self.mouse_coords = [cell_coords]
+        print(self.mouse_coords)
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
@@ -472,7 +469,9 @@ def online_run(network, MY_COLOR, color, sounds):
                         if event.button == 1:
                             board.get_click(event.pos)
                         elif event.button == 3:
-                            board.mouse_coords.append(board.get_cell(event.pos))
+                            print('да')
+                            if board.get_cell(event.pos) is not None:
+                                board.mouse_coords.append(board.get_cell(event.pos))
             print(COLOR)
             count_fps += 1
             if count_fps % 100 == 0:
@@ -517,7 +516,6 @@ def offline_run(sounds):
     COLOR = WHITE
     MY_COLOR = WHITE
     # screen — холст, на котором нужно рисовать:
-    screen = pygame.display.set_mode(size)
     pygame.display.set_caption('Шашки')
     clock = pygame.time.Clock()
 
@@ -525,8 +523,8 @@ def offline_run(sounds):
     nlo_sprites = pygame.sprite.Group()
 
     board = Board(8, 8)
-    board.set_view(50, 50, 50)
 
+    screen = pygame.display.set_mode((board.left * 2 + board.cell_size * 8, board.top * 2 + board.cell_size * 8))
     board.render(screen, MY_COLOR, None, sounds)
     all_sprites.draw(screen)
     pygame.display.flip()
@@ -536,11 +534,12 @@ def offline_run(sounds):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if COLOR == MY_COLOR:
+                if COLOR == COLOR:
                     if event.button == 1:
                         board.get_click(event.pos)
                     elif event.button == 3:
-                        board.mouse_coords.append(board.get_cell(event.pos))
+                        if board.get_cell(event.pos) is not None:
+                            board.mouse_coords.append(board.get_cell(event.pos))
 
         if COLOR != MY_COLOR:
             board.bot_move()
