@@ -178,6 +178,12 @@ def settings_run(main_font, sounds):
         for i, t in enumerate(sp):
             text1 = font.render(t, True, 'black')
             screen.blit(text1, (width * 0.1, height * 0.1 * i + 280))
+
+            pygame.draw.rect(screen, '#a04c0b', (width * 0.875 - 4, height * 0.1 * i + 280 - 4, 45, 50), 0)
+            pygame.draw.rect(screen, '#a04c0b', (width * 0.8 - 4, height * 0.1 * i + 280 - 4, 45, 50), 0)
+            pygame.draw.rect(screen, 'white', (width * 0.875 - 2, height * 0.1 * i + 280 - 2, 41, 46), 0)
+            pygame.draw.rect(screen, 'white', (width * 0.8 - 2, height * 0.1 * i + 280 - 2, 41, 46), 0)
+
             pygame.draw.line(screen, '#a04c0b', (width * 0.9, height * 0.1 * i + 280),
                              (width * 0.9, height * 0.1 * i + 40 + 280),
                              width=5)
