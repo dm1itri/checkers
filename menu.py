@@ -63,6 +63,7 @@ class Menu:
         sounds['move'] = move
         sounds['on_sounds'] = True
         sounds['on_music'] = True
+        sounds['on_effects'] = True
 
         clock = pygame.time.Clock()
         running = True
@@ -116,7 +117,8 @@ class Menu:
             buttons_group.update()
 
             if count_fps % 30 == 0:
-                create_particles((randrange(0, width), -50), part_group)
+                if sounds['on_effects']:
+                    create_particles((randrange(0, width), -50), part_group)
 
             pygame.display.flip()
             clock.tick(fps)

@@ -59,7 +59,8 @@ def on_off_run(main_font, sounds):
         buttons_group.update()
 
         if count_fps % 60 == 0:
-            create_particles((randrange(0, width), -50), part_group)
+            if sounds['on_effects']:
+                create_particles((randrange(0, width), -50), part_group)
 
         pygame.display.flip()
         clock.tick(fps)

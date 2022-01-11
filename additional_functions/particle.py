@@ -4,7 +4,7 @@ import pygame
 from additional_functions.load_image import load_image
 
 
-screen_rect = (0, 0, 700, 500)
+screen_rect = (0, 0, 700, 575)
 gravity = 0.1
 
 

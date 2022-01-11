@@ -7,7 +7,7 @@ WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
 MY_COLOR = WHITE
-main_font = None
+main_font = 'additional_functions/fonts/main.ttf'
 COUNT_WHITE_KILLED = 0
 COUNT_BLACK_KILLED = 0
 
@@ -206,28 +206,28 @@ class Board:
 
         screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
         screen.fill('#ac9362', (
-            self.left - 10, self.top - 10, self.cell_size * self.width + 20, self.cell_size * self.height + 20))
+            self.left - 20, self.top - 20, self.cell_size * self.width + 40, self.cell_size * self.height + 40))
 
         font = pygame.font.Font(main_font, 35)
         text = font.render(f"{'Ваш ход' if COLOR == WHITE else 'Ход противника'}", True, (255, 255, 255))
-        screen.blit(text, (self.left, 10))
+        screen.blit(text, (self.left, self.top - 80))
 
         text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
-                           self.top + self.cell_size * self.height + 10))
+                           self.top + self.cell_size * self.height + 20))
         text = font.render(":", True, '#964b00')
         screen.blit(text,
-                    (self.left + 0.5 * self.cell_size * self.width - 1, self.top + self.cell_size * self.height + 10))
+                    (self.left + 0.5 * self.cell_size * self.width - 1, self.top + self.cell_size * self.height + 20))
         text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
         screen.blit(text,
-                    (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 10))
+                    (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 20))
         font = pygame.font.Font(main_font, 17)
         for i in range(1, 9):
             text = font.render(str(i), True, (0, 0, 0))
-            screen.blit(text, (self.left - 8, self.top + self.cell_size * (i - 0.5)))
-            screen.blit(text, (self.left + self.cell_size * self.width + 2, self.top + self.cell_size * (i - 0.5)))
+            screen.blit(text, (self.left - 15, self.top + self.cell_size * (i - 0.5)))
+            screen.blit(text, (self.left + self.cell_size * self.width + 5, self.top + self.cell_size * (i - 0.5)))
             text = font.render('ABCDEFGH'[i - 1], True, (0, 0, 0))
-            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top - 10))
+            screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top - 20))
             screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top + self.cell_size * self.height))
 
         for i in range(self.height):
