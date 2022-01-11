@@ -7,31 +7,61 @@ from additional_functions.particle import create_particles
 
 def mouse_coords(mouse_coords, sett):
     x, y = mouse_coords[0], mouse_coords[1]
+    flag = False
     if width * 0.875 <= x <= width * 0.925:
-        if 0 <= y <= 0 + 40:
-            sett[0] = 100 if sett[0] == 100 else sett[0] + 10
-        elif height * 0.1 <= y <= height * 0.1 + 40:
-            sett[1] = 100 if sett[1] == 100 else sett[1] + 10
-        elif height * 0.2 <= y <= height * 0.2 + 40:
-            sett[2] = 75 if sett[2] == 75 else sett[2] + 5
-        elif height * 0.3 <= y <= height * 0.3 + 40:
+        if 0 <= y <= 0 + 40 + 220:
+            if sett[0] == 100:
+                sett[0] = 100
+            else:
+                sett[0] += 10
+                flag = True
+        elif height * 0.1 + 220 <= y <= height * 0.1 + 40 + 220:
+            if sett[1] == 100:
+                sett[1] = 100
+            else:
+                sett[1] += 10
+                flag = True
+        elif height * 0.2 + 220 <= y <= height * 0.2 + 40 + 220:
+            if sett[2] == 75:
+                sett[2] = 75
+            else:
+                sett[2] += 5
+                flag = True
+        elif height * 0.3 + 220 <= y <= height * 0.3 + 40 + 220:
             sett[3] = 1
-        elif height * 0.4 <= y <= height * 0.4 + 40:
+            flag = True
+        elif height * 0.4 + 220 <= y <= height * 0.4 + 40 + 220:
             sett[4] = 1
+            flag = True
     elif width * 0.8 <= x <= width * 0.85:
-        if 0 <= y <= 0 + 40:
-            sett[0] = 20 if sett[0] == 20 else sett[0] - 10
-        elif height * 0.1 <= y <= height * 0.1 + 40:
-            sett[1] = 40 if sett[1] == 40 else sett[1] - 10
-        elif height * 0.2 <= y <= height * 0.2 + 40:
-            sett[2] = 30 if sett[2] == 30 else sett[2] - 5
-        elif height * 0.3 <= y <= height * 0.3 + 40:
+        if 0 <= y <= 0 + 40 + 220:
+            if sett[0] == 20:
+                sett[0] = 20
+            else:
+                sett[0] -= 10
+                flag = True
+        elif height * 0.1 + 220 <= y <= height * 0.1 + 40 + 220:
+            if sett[1] == 40:
+                sett[1] = 40
+            else:
+                sett[1] -= 10
+                flag = True
+        elif height * 0.2 + 220 <= y <= height * 0.2 + 40 + 220:
+            if sett[2] == 30:
+                sett[2] = 30
+            else:
+                sett[2] -= 5
+                flag = True
+        elif height * 0.3 + 220 <= y <= height * 0.3 + 40 + 220:
             sett[3] = 0
-        elif height * 0.4 <= y <= height * 0.4 + 40:
+            flag = True
+        elif height * 0.4 + 220 <= y <= height * 0.4 + 40 + 220:
             sett[4] = 0
-
-    with open('data/settings.txt', 'w') as f:
+            flag = True
+    with open('additional_functions/data/settings.txt', 'w') as f:
         f.write(' '.join(str(i) for i in sett))
+    return flag
+
 
 
 def settings_run(main_font, sounds):
@@ -68,6 +98,10 @@ def settings_run(main_font, sounds):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    data = mouse_coords(event.pos, sett)
+                    if data:
+                        sounds['click'].play(0)
                 for but in list(buttons.keys()):
                     if but.onclick(event.pos):
                         if sounds['on_sounds']:
@@ -130,7 +164,8 @@ def settings_run(main_font, sounds):
         for i, t in enumerate(sp):
             text1 = font.render(t, True, 'black')
             screen.blit(text1, (width * 0.1, height * 0.1 * i + 220))
-            pygame.draw.line(screen, '#a04c0b', (width * 0.9, height * 0.1 * i + 220), (width * 0.9, height * 0.1 * i + 40 + 220),
+            pygame.draw.line(screen, '#a04c0b', (width * 0.9, height * 0.1 * i + 220),
+                             (width * 0.9, height * 0.1 * i + 40 + 220),
                              width=5)
             pygame.draw.line(screen, '#a04c0b', (width * 0.875, height * 0.1 * i + 20 + 220),
                              (width * 0.925, height * 0.1 * i + 20 + 220), width=5)
