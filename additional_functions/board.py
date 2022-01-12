@@ -98,7 +98,7 @@ class Queen(Shapes):
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
         self.image = pygame.transform.scale(self.image, size)
 
-    def can_move(self, board, x, y, pos_att, mine):
+    def can_move(self, board, x, y, pos_att, mine, offline):
         sp_kill = []
         for i, j in pos_att:
             sp_kill1 = []
@@ -107,7 +107,8 @@ class Queen(Shapes):
                     iv = -i1 if j < y else i1
                     ih = -i1 if i < x else i1
                     if board[y + iv][x + ih] is not None:
-                        if board[y + iv][x + ih].color == WHITE and mine:
+                        if (board[y + iv][x + ih].color == WHITE and mine and not offline) or (
+                                board[y + iv][x + ih].color == COLOR and offline):
                             return False
                         sp_kill1.append([x + ih, y + iv])
 
@@ -125,7 +126,7 @@ class Queen(Shapes):
 
 
 class Usual(Shapes):
-    def can_move(self, board, x, y, pos_att, mine):
+    def can_move(self, board, x, y, pos_att, mine, offline=False):
         if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1\
                 and len(pos_att) == 1 and self.color == BLACK:
             if board[pos_att[0][1]][pos_att[0][0]] is None:
@@ -147,7 +148,7 @@ class Usual(Shapes):
                     if kill is None:
                         return False
 
-                    if kill.color == WHITE and mine:
+                    if (kill.color == WHITE and mine and not offline) or (kill.color == COLOR and offline):
                         print(kill.color, WHITE)
                         return False
 
@@ -158,10 +159,11 @@ class Usual(Shapes):
 
 class Board:
     # создание поля
-    def __init__(self, width, height):
+    def __init__(self, width, height, offline=False):
         self.width = width
         self.height = height
         self.field = [[None] * 8 for _ in range(8)]
+        self.offline = offline
 
         with open('additional_functions/data/settings.txt') as f:
             f = f.read()
@@ -247,14 +249,15 @@ class Board:
         if self.mouse_coords:
             x, y = self.mouse_coords[0]
             if self.field[y][x]:
-                if self.field[y][x].color == WHITE:
+                if (self.field[y][x].color == WHITE and not self.offline) or (
+                        self.field[y][x].color == COLOR and self.offline):
                     screen.fill('blue', (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
 
                     if self.illumination:
                         for i in range(self.height):
                             for j in range(self.width):
-                                if self.field[y][x].can_move(self.field, x, y, ([j, i],), True):
+                                if self.field[y][x].can_move(self.field, x, y, ([j, i],), True, offline=self.offline):
                                     screen.fill('green',
                                                 (self.left + self.cell_size * j, self.top + self.cell_size * i,
                                                  self.cell_size, self.cell_size))
@@ -273,10 +276,10 @@ class Board:
 
         if s is None:
             return False
-        if s.color != WHITE and mine:
+        if (s.color != WHITE and mine and not self.offline) or (s.color != COLOR and self.offline):
             return False
 
-        rez = s.can_move(self.field, x, y, pos_att, mine)
+        rez = s.can_move(self.field, x, y, pos_att, mine, offline=self.offline)
         if not rez:
             return False
         if rez == 1:
@@ -336,10 +339,11 @@ class Board:
             for j in range(8):
                 checker = self.field[j][i]
                 if checker:
-                    if checker.color == WHITE and mine:
+                    if (checker.color == WHITE and mine and not self.offline) or (
+                            checker.color == COLOR and self.offline):
                         for i1 in range(8):
                             for j1 in range(8):
-                                rez = checker.can_move(self.field, i, j, [(j1, i1)], mine)
+                                rez = checker.can_move(self.field, i, j, [(j1, i1)], mine, offline=self.offline)
                                 if type(rez) == list:
                                     if len(rez) == 1:
                                         print(i, j, [(j1, i1)])
@@ -522,7 +526,7 @@ def offline_run(sounds):
     all_sprites = pygame.sprite.Group()
     nlo_sprites = pygame.sprite.Group()
 
-    board = Board(8, 8)
+    board = Board(8, 8, offline=True)
 
     screen = pygame.display.set_mode((board.left * 2 + board.cell_size * 8, board.top * 2 + board.cell_size * 8))
     board.render(screen, MY_COLOR, None, sounds)
@@ -530,6 +534,7 @@ def offline_run(sounds):
     pygame.display.flip()
     running = True
     while running:
+        print(COLOR)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
