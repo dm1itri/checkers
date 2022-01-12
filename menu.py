@@ -7,6 +7,7 @@ from additional_functions.settings import settings_run
 from additional_functions.particle import create_particles
 
 from additional_functions.load_image import load_image
+from additional_functions.statistics import statistics
 from additional_functions.search_game import search_game_run
 from additional_functions.dialog_win import dialog_run
 from additional_functions.game_over import game_over_run
@@ -41,7 +42,7 @@ class Menu:
 
         print(main_text)
         # создание кнопок
-        texts = {i[0]: i[1] for i in enumerate(['Играть', 'Настройки'])}
+        texts = {i[0]: i[1] for i in enumerate(['Играть', 'Настройки', 'Статистика'])}
         buttons = {}
         for i in range(1, len(texts) + 1):
             text = self.text(self.main_font, 50, texts[i - 1], '#c15c0f')
@@ -97,18 +98,16 @@ class Menu:
                                                 pygame.mixer.music.set_volume(0.05)
                                                 winner = online_run(network, my_color, 'white', sounds)
                                                 pygame.mixer.music.set_volume(0.2)
-
+                                                game_over_run(winner, self.main_font, sounds)
 
                                             else:
                                                 network.send('end')
                                     elif out == 'offline':
-                                        pygame.mixer.music.set_volume(0.05)
-                                        winner = offline_run(sounds)
-                                        pygame.mixer.music.set_volume(0.2)
-                                        print(winner)
-                                        game_over_run(winner, self.main_font, sounds, offline=True)
+                                        offline_run(sounds)
                                 elif text_btn == 'Настройки':
                                     settings_run(self.main_font, sounds)
+                                elif text_btn == 'Статистика':
+                                    statistics(self.main_font, sounds)
                     elif event.button == 3:
                         pass
             count_fps += 1
