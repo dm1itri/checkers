@@ -513,7 +513,10 @@ def online_run(network, MY_COLOR, color, sounds):
 
 
 def offline_run(sounds):
-    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS, COLOR
+    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
+    COUNT_WHITE_KILLED = 0
+    COUNT_BLACK_KILLED = 0
+
     pygame.init()
     FPS = 50
     size = 500, 550
@@ -549,15 +552,21 @@ def offline_run(sounds):
         if COLOR != MY_COLOR:
             board.bot_move()
 
+        flag_winner = winner(MY_COLOR)
+        if flag_winner is not None:
+            running = False
+            continue
+
         board.render(screen, MY_COLOR, None, sounds)
         all_sprites.draw(screen)
         pygame.display.flip()
+    return flag_winner
 
 
 def winner(MY_COLOR):
-    if COUNT_BLACK_KILLED == 12:
+    if COUNT_BLACK_KILLED == 1:
         return True
-    if COUNT_WHITE_KILLED == 12:
+    if COUNT_WHITE_KILLED == 1:
         return False
     return None
 

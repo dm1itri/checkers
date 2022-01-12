@@ -4,7 +4,7 @@ from additional_functions.board import load_move, send_move
 from additional_functions.button import Button
 
 
-def game_over_run(winner, main_font, sounds):
+def game_over_run(winner, main_font, sounds, offline=False):
     pygame.init()
     size = width, height = 550, 300
     fps = 30
@@ -23,10 +23,14 @@ def game_over_run(winner, main_font, sounds):
         buttons[btn] = texts[i - 1]
 
     if winner is None:
-        text = 'Игра завершена,\nтак как один из\nигроков покинул ее'
+        if not offline:
+            text = 'Игра завершена,\nтак как один из\nигроков покинул ее'
+        else:
+            text = '\nИгра завершена'
     elif winner:
         text = 'Игра завершена,\nВы одержали победу'
     else:
+
         text = 'Игра завершена,\nВы потерпели\nпоражение'
 
     while running:

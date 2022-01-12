@@ -97,12 +97,16 @@ class Menu:
                                                 pygame.mixer.music.set_volume(0.05)
                                                 winner = online_run(network, my_color, 'white', sounds)
                                                 pygame.mixer.music.set_volume(0.2)
-                                                game_over_run(winner, self.main_font, sounds)
+
 
                                             else:
                                                 network.send('end')
                                     elif out == 'offline':
-                                        offline_run(sounds)
+                                        pygame.mixer.music.set_volume(0.05)
+                                        winner = offline_run(sounds)
+                                        pygame.mixer.music.set_volume(0.2)
+                                        print(winner)
+                                        game_over_run(winner, self.main_font, sounds, offline=True)
                                 elif text_btn == 'Настройки':
                                     settings_run(self.main_font, sounds)
                     elif event.button == 3:
