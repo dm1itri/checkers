@@ -349,6 +349,23 @@ class Board:
                                         return False
         return True
 
+    def check_can_move(self):
+        for i in range(8):
+            for j in range(8):
+                checker = self.field[j][i]
+                if checker:
+                    if (checker.color == color_opponent() and not self.offline) or (
+                            checker.color == color_opponent() and self.offline):
+                        for i1 in range(8):
+                            for j1 in range(8):
+                                rez = checker.can_move(self.field, i, j, [(j1, i1)], False, offline=self.offline)
+                                if type(rez) == list:
+                                    if len(rez) == 1:
+                                        return False
+                                elif rez:
+                                    return False
+        return True
+
     def animation(self, checker, x, y, x1, y1):
         '''Анимация перемещения шашек'''
         if self.sounds['on_sounds']:
@@ -494,7 +511,7 @@ def online_run(network, MY_COLOR, color, sounds):
 
                                 board.move(last[0], last[1], new, False)
                                 COLOR = color_opponent()
-
+            flag_winner1 = board.check_can_move()
             flag_winner = winner(MY_COLOR)
             if flag_winner is not None:
                 with conn:  # кол-во выигранных матчей
@@ -574,6 +591,8 @@ def offline_run(sounds):
 
 
 def winner(MY_COLOR):
+    if board.check_can_move():
+        return True if COLOR == WHITE else False
     if COUNT_BLACK_KILLED == 12:
         return True
     if COUNT_WHITE_KILLED == 12:
