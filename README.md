@@ -22,6 +22,9 @@ _**Классы**_:
 - Menu
 - Network
 - OnlineGame
+- Particle
+- AnimatedSprite(pygame.spite.Sprite)
+- ThreadMain(threading.Thread)
 - Будут добавляться в процессе разработки
 
 _**Основные Функции**_:
