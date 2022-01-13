@@ -444,7 +444,7 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        conn = connect('checkers/additional_functions/data/profile.sqlite')
+        conn = connect('additional_functions/data/profile.sqlite')
         with conn:  # Начатые матчи
             conn.cursor().execute('UPDATE statistics_matches set count = count + 1')
             conn.commit()
@@ -495,12 +495,14 @@ def online_run(network, MY_COLOR, color, sounds):
                                 board.move(last[0], last[1], new, False)
                                 COLOR = color_opponent()
 
-            flag_winner = winner_online(MY_COLOR)
+            flag_winner = winner(MY_COLOR)
             if flag_winner is not None:
                 with conn:  # кол-во выигранных матчей
                     if flag_winner:
                         conn.cursor().execute('UPDATE statistics_matches set count_win = count_win + 1')
-                    conn.cursor().execute(f'UPDATE statistics_matches set (count, time_in) = (count + 1, time_in + {pygame.time.get_ticks() // 1000})')
+                    conn.cursor().execute(
+                        f'UPDATE statistics_matches set (count_compl, time_in) = (count_compl + 1, time_in + '
+                        f'{pygame.time.get_ticks() // 1000})')
                     conn.commit()
                 network.send('winner')
                 running = False
@@ -521,12 +523,16 @@ def online_run(network, MY_COLOR, color, sounds):
 
 
 def offline_run(sounds):
-    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS, COLOR
+    global screen, all_sprites, board, clock, nlo_sprites, nlo, FPS, COLOR, COUNT_WHITE_KILLED, COUNT_BLACK_KILLED
+    COUNT_WHITE_KILLED = 0
+    COUNT_BLACK_KILLED = 0
+
     pygame.init()
     FPS = 50
     size = 500, 550
     COLOR = WHITE
     MY_COLOR = WHITE
+    flag_winner = None
     # screen — холст, на котором нужно рисовать:
     pygame.display.set_caption('Шашки')
     clock = pygame.time.Clock()
@@ -553,6 +559,10 @@ def offline_run(sounds):
                     elif event.button == 3:
                         if board.get_cell(event.pos) is not None:
                             board.mouse_coords.append(board.get_cell(event.pos))
+        flag_winner = winner(MY_COLOR)
+        if flag_winner is not None:
+            running = False
+            continue
 
         if COLOR != MY_COLOR:
             board.bot_move()
@@ -560,6 +570,7 @@ def offline_run(sounds):
         board.render(screen, MY_COLOR, None, sounds)
         all_sprites.draw(screen)
         pygame.display.flip()
+    return flag_winner
 
 
 def winner(MY_COLOR):
@@ -569,19 +580,6 @@ def winner(MY_COLOR):
         return False
     return None
 
-
-def winner_online(MY_COLOR):
-    if MY_COLOR == WHITE:
-        if COUNT_BLACK_KILLED == 12:
-            return True
-        if COUNT_WHITE_KILLED == 12:
-            return False
-    else:
-        if COUNT_BLACK_KILLED == 12:
-            return False
-        if COUNT_WHITE_KILLED == 12:
-            return True
-    return None
 
 def remove_spites(group):
     for sprite in group:
