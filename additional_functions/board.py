@@ -1,6 +1,7 @@
 import pygame
 from additional_functions.load_image import load_image
 from sqlite3 import connect
+from math import ceil
 
 WHITE = 'white'
 BLACK = 'black'
@@ -354,11 +355,19 @@ class Board:
         if self.sounds['on_sounds']:
             self.sounds['move'].play(0)
 
-        delta_x = (x1 - x) * 0.1 * self.cell_size
-        delta_y = (y1 - y) * 0.1 * self.cell_size
+        delta_x = (x1 - x) / 10 * self.cell_size
+        delta_y = (y1 - y) / 10 * self.cell_size
+        remain_x = 0
+        remain_y = 0
         for i in range(10):
-            checker.rect.x += delta_x
-            checker.rect.y += delta_y
+            remain_x += delta_x - round(delta_x)
+            remain_y += delta_y - round(delta_y)
+            checker.rect.x += delta_x + ceil(remain_x)
+            checker.rect.y += delta_y + ceil(remain_y)
+
+            remain_x = 0
+            remain_y = 0
+            print(checker.rect.x, checker.rect.y, delta_x, delta_y, remain_x, remain_y)
             self.render(screen, self.my_color, self.network, self.sounds)
             all_sprites.draw(screen)
             pygame.display.flip()
@@ -548,7 +557,6 @@ def offline_run(sounds):
     pygame.display.flip()
     running = True
     while running:
-        print(COLOR)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
