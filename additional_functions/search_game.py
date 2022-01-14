@@ -6,6 +6,8 @@ from additional_functions.load_image import load_image
 
 
 def search_game_run(main_font, sounds):
+    """Окно поиска игры игры"""
+
     pygame.init()
     size = width, height = 500, 500
     fps = 30

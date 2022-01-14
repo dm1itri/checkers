@@ -22,6 +22,8 @@ def terminate():
 
 
 class Menu:
+    """Окно меню игры"""
+
     def __init__(self):
         self.main_font = 'additional_functions/data/fonts/main.ttf'
         pass

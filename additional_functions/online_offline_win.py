@@ -6,6 +6,8 @@ from additional_functions.particle import create_particles
 
 
 def on_off_run(main_font, sounds):
+    """Диалоговое окно выбора режима игры"""
+
     pygame.init()
     size = width, height = 500, 500
     # screen — холст, на котором нужно рисовать:

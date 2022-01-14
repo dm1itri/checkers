@@ -9,6 +9,8 @@ gravity = 0.1
 
 
 class Particle(pygame.sprite.Sprite):
+    """Визуальные эффекты"""
+
     # сгенерируем частицы разного размера
     fire = [pygame.transform.scale(load_image("black.png"), (60, 60)),
             pygame.transform.scale(load_image('white.png'), (60, 60))]

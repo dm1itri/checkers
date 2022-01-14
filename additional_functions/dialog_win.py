@@ -5,6 +5,9 @@ from additional_functions.button import Button
 
 
 def dialog_run(text, main_font, sounds):
+    """Диалоговое окно присоединения игры"""
+
+
     pygame.init()
     size = width, height = 500, 300
     fps = 30

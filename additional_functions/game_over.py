@@ -5,6 +5,8 @@ from additional_functions.button import Button
 
 
 def game_over_run(winner, main_font, sounds, offline=False):
+    """Диалоговое окно завершения игры"""
+
     pygame.init()
     size = width, height = 550, 300
     fps = 30

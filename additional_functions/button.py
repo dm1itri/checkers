@@ -2,6 +2,8 @@ import pygame
 
 
 class Button(pygame.sprite.Sprite):
+    """Универсальная кнопка"""
+
     def __init__(self, x, y, height, width, text, color, win, *groups):
         super().__init__(*groups)
         self.height = height

@@ -6,6 +6,7 @@ from additional_functions.particle import create_particles
 
 
 def mouse_coords(mouse_coords, sett):
+
     x, y = mouse_coords[0], mouse_coords[1]
     flag = False
     if width * 0.875 <= x <= width * 0.925:
@@ -64,6 +65,8 @@ def mouse_coords(mouse_coords, sett):
 
 
 def settings_run(main_font, sounds):
+    """Окно поиска игры"""
+
     global width, height
     pygame.init()
     size = width, height = 700, 575

@@ -18,7 +18,8 @@ def color_opponent():
     return BLACK
 
 
-def check_wqueen(board):  # проверка есть ли белые шашки расположенные на линии дамок
+def check_wqueen(board):
+    """Проверка на белые дамки"""
     sp = []
     for i in range(1, 8, 2):
         b = board[0][i]
@@ -29,6 +30,7 @@ def check_wqueen(board):  # проверка есть ли белые шашки
 
 
 def check_bqueen(board):
+    """Проверка на черные дамки"""
     sp = []
     for i in range(0, 7, 2):
         b = board[7][i]
@@ -39,6 +41,7 @@ def check_bqueen(board):
 
 
 class Shapes(pygame.sprite.Sprite):
+    """Общий класс фигур"""
 
     def __init__(self, group, color, size):
         super().__init__(group)
@@ -55,6 +58,8 @@ class Shapes(pygame.sprite.Sprite):
 
 
 class Queen(Shapes):
+    """Дамка"""
+
     def __init__(self, group, color, size):
         super().__init__(group, color, size)
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
@@ -88,6 +93,8 @@ class Queen(Shapes):
 
 
 class Usual(Shapes):
+    """Пешка"""
+
     def can_move(self, board, x, y, pos_att, mine, offline=False):
         if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1\
                 and len(pos_att) == 1 and self.color == BLACK:
@@ -120,6 +127,8 @@ class Usual(Shapes):
 
 
 class Board:
+    """Игровое поле"""
+
     # создание поля
     def __init__(self, width, height, offline=False):
         self.width = width
@@ -156,7 +165,6 @@ class Board:
         self.field[7][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.mouse_coords = []
-
 
     def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
@@ -308,7 +316,7 @@ class Board:
         return True
 
     def animation(self, checker, x, y, x1, y1):
-        '''Анимация перемещения шашек'''
+        """Анимация перемещения шашек"""
         if self.sounds['on_sounds']:
             self.sounds['move'].play(0)
 
@@ -325,6 +333,7 @@ class Board:
             clock.tick(50)
         checker.rect.x += delta_x + -modf(delta_x)[0]
         checker.rect.y += delta_y + -modf(delta_y)[0]
+
     def bot_move(self):
         """ИИ для бота"""
         return False
@@ -368,9 +377,10 @@ class Board:
 
 
 def load_move(data):
+    """Декодирование хода"""
+
     if data == 'None':
         return False
-    print(f'{data} = data')
 
     data = data.split('%')
     last = int(data[0]), int(data[1])
@@ -380,6 +390,8 @@ def load_move(data):
 
 
 def send_move(last, new):
+    """Кодирование хода"""
+
     new = '%'.join('%'.join([str(i[0]), str(i[1])]) for i in new)
     return '%'.join([str(last[0]), str(last[1]), new])
 

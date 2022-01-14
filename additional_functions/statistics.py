@@ -5,6 +5,8 @@ from additional_functions.particle import create_particles
 
 
 def draw(screen, main_font):
+    """Окно статистики игры"""
+
     conn = connect('additional_functions/data/database/profile.sqlite')
     with conn:  # возвращение информации
         t = conn.cursor().execute(f'SELECT * from statistics_matches').fetchone()
