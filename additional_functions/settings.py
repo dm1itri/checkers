@@ -74,7 +74,7 @@ def settings_run(main_font, sounds):
     part_group = pygame.sprite.Group()
     clock = pygame.time.Clock()
     fps = 60
-    font = pygame.font.Font('additional_functions/fonts/main.ttf', 30)
+    font = pygame.font.Font('additional_functions/data/fonts/main.ttf', 30)
     running = True
 
     settings_text = 'Музыка\nЗвуки\nЭффекты'

@@ -1,13 +1,13 @@
 import pygame
 from additional_functions.load_image import load_image
 from sqlite3 import connect
-from math import ceil
+from math import modf
 
 WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
 MY_COLOR = WHITE
-main_font = 'additional_functions/fonts/main.ttf'
+main_font = 'additional_functions/data/fonts/main.ttf'
 COUNT_WHITE_KILLED = 0
 COUNT_BLACK_KILLED = 0
 
@@ -312,20 +312,19 @@ class Board:
         if self.sounds['on_sounds']:
             self.sounds['move'].play(0)
 
-        delta_x = (x1 - x) / 10 * self.cell_size
-        delta_y = (y1 - y) / 10 * self.cell_size
+        delta_x = (x1 - x) * 0.1 * self.cell_size
+        delta_y = (y1 - y) * 0.1 * self.cell_size
 
         for i in range(10):
-            remain_x = delta_x - round(delta_x)
-            remain_y = delta_y - round(delta_y)
-            checker.rect.x += delta_x + ceil(remain_x)
-            checker.rect.y += delta_y + ceil(remain_y)
-            print(checker.rect.x, checker.rect.y, delta_x, delta_y, remain_x, remain_y)
+            checker.rect.x += delta_x + -modf(delta_x)[0]
+            checker.rect.y += delta_y + -modf(delta_y)[0]
+
             self.render(screen, self.my_color, self.network, self.sounds)
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
-
+        checker.rect.x += delta_x + -modf(delta_x)[0]
+        checker.rect.y += delta_y + -modf(delta_y)[0]
     def bot_move(self):
         """ИИ для бота"""
         return False
@@ -406,7 +405,7 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        conn = connect('additional_functions/data/profile.sqlite')
+        conn = connect('additional_functions/data/database/profile.sqlite')
         with conn:  # Начатые матчи
             conn.cursor().execute('UPDATE statistics_matches set count = count + 1')
             conn.commit()
@@ -441,7 +440,6 @@ def online_run(network, MY_COLOR, color, sounds):
                             print('да')
                             if board.get_cell(event.pos) is not None:
                                 board.mouse_coords.append(board.get_cell(event.pos))
-            print(COLOR)
             count_fps += 1
             if count_fps % 100 == 0:
                 data = network.send('get_move')
