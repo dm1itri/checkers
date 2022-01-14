@@ -12,23 +12,6 @@ COUNT_WHITE_KILLED = 0
 COUNT_BLACK_KILLED = 0
 
 
-# def load_board(filename):
-#     filename = "data/" + filename
-#     # читаем уровень, убирая символы перевода строки
-#     try:
-#         with open(filename, 'r') as mapFile:
-#             level_map = [line.strip() for line in mapFile]
-#     except FileNotFoundError:
-#         print(f'Файл {filename} не найден')
-#         return False
-#     # и подсчитываем максимальную длину
-#     max_width = max(map(len, level_map))
-#
-#     # дополняем каждую строку пустыми клетками ('.')
-#     maps = list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
-#     return maps
-
-
 def color_opponent():
     if COLOR == BLACK:
         return WHITE
@@ -69,27 +52,6 @@ class Shapes(pygame.sprite.Sprite):
 
     def kill(self):
         all_sprites.remove(self)
-
-
-# class GameOver(pygame.sprite.Sprite):
-#     image = load_image("gameover.png")
-#
-#     def __init__(self, group):
-#         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
-#         # Это очень важно !!!
-#         super().__init__(group)
-#         self.image = GameOver.image
-#         self.rect = self.image.get_rect()
-#         self.width = self.rect.width
-#         self.rect.x = -self.width
-#         self.rect.y = 0
-#         self.right = True
-#
-#     def update(self, *args):
-#         if self.rect.x == 0:
-#             self.right = False
-#         if self.right:
-#             self.rect.x += 1
 
 
 class Queen(Shapes):
@@ -195,11 +157,6 @@ class Board:
         self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.mouse_coords = []
 
-    # настройка внешнего вида  (пока не тестировалось)
-    # def set_view(self, left, top, cell_size):
-    #     self.left = left
-    #     self.top = top
-    #     self.cell_size = cell_size
 
     def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
@@ -357,16 +314,12 @@ class Board:
 
         delta_x = (x1 - x) / 10 * self.cell_size
         delta_y = (y1 - y) / 10 * self.cell_size
-        remain_x = 0
-        remain_y = 0
+
         for i in range(10):
-            remain_x += delta_x - round(delta_x)
-            remain_y += delta_y - round(delta_y)
+            remain_x = delta_x - round(delta_x)
+            remain_y = delta_y - round(delta_y)
             checker.rect.x += delta_x + ceil(remain_x)
             checker.rect.y += delta_y + ceil(remain_y)
-
-            remain_x = 0
-            remain_y = 0
             print(checker.rect.x, checker.rect.y, delta_x, delta_y, remain_x, remain_y)
             self.render(screen, self.my_color, self.network, self.sounds)
             all_sprites.draw(screen)
