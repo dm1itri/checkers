@@ -7,7 +7,7 @@ WHITE = 'white'
 BLACK = 'black'
 COLOR = WHITE
 MY_COLOR = WHITE
-main_font = 'additional_functions/data/fonts/main.ttf'
+main_font = '../../program_code/checkers/additional_functions/data/fonts/main.ttf'
 COUNT_WHITE_KILLED = 0
 COUNT_BLACK_KILLED = 0
 
@@ -127,7 +127,7 @@ class Board:
         self.field = [[None] * 8 for _ in range(8)]
         self.offline = offline
 
-        with open('additional_functions/data/settings.txt') as f:
+        with open('../../program_code/checkers/additional_functions/data/settings.txt') as f:
             f = f.read()
             self.left, self.top, self.cell_size, self.illumination, self.animation_ = [int(i) for i in f.split()]
 
@@ -156,7 +156,6 @@ class Board:
         self.field[7][4] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.mouse_coords = []
-
 
     def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
@@ -325,6 +324,7 @@ class Board:
             clock.tick(50)
         checker.rect.x += delta_x + -modf(delta_x)[0]
         checker.rect.y += delta_y + -modf(delta_y)[0]
+
     def bot_move(self):
         """ИИ для бота"""
         return False
@@ -405,7 +405,7 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        conn = connect('additional_functions/data/database/profile.sqlite')
+        conn = connect('../../program_code/checkers/additional_functions/data/database/profile.sqlite')
         with conn:  # Начатые матчи
             conn.cursor().execute('UPDATE statistics_matches set count = count + 1')
             conn.commit()

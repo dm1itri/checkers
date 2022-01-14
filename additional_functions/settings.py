@@ -58,7 +58,7 @@ def mouse_coords(mouse_coords, sett):
         elif height * 0.4 + 280 <= y <= height * 0.4 + 40 + 280:
             sett[4] = 0
             flag = True
-    with open('additional_functions/data/settings.txt', 'w') as f:
+    with open('../../program/checkers/additional_functions/data/settings.txt', 'w') as f:
         f.write(' '.join(str(i) for i in sett))
     return flag
 
@@ -74,7 +74,7 @@ def settings_run(main_font, sounds):
     part_group = pygame.sprite.Group()
     clock = pygame.time.Clock()
     fps = 60
-    font = pygame.font.Font('additional_functions/data/fonts/main.ttf', 30)
+    font = pygame.font.Font('../../program/checkers/additional_functions/data/fonts/main.ttf', 30)
     running = True
 
     settings_text = 'Музыка\nЗвуки\nЭффекты'
@@ -171,7 +171,7 @@ def settings_run(main_font, sounds):
         for i, l in enumerate(lines):
             screen.blit(_text(main_font, 50, l, 'black'), (width * 0.1, 30 + 80 * i))
 
-        with open('additional_functions/data/settings.txt') as f:
+        with open('../../program_code/checkers/additional_functions/data/settings.txt') as f:
             sett = [int(i) for i in f.read().split()]
         sp = [f'Левый и правый отступ={sett[0]}', f'Верхний и нижний отступ={sett[1]}', f'Ширина клетки={sett[2]}',
               f'Подсветка ходов={"ON" if sett[3] else "OFF"}', f'Анимация хода={"ON" if sett[4] else "OFF"}']

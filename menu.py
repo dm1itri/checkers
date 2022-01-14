@@ -23,7 +23,7 @@ def terminate():
 
 class Menu:
     def __init__(self):
-        self.main_font = 'additional_functions/data/fonts/main.ttf'
+        self.main_font = '../../program_code/checkers/additional_functions/data/fonts/main.ttf'
         pass
 
     def run(self):
@@ -50,14 +50,14 @@ class Menu:
             buttons[btn] = texts[i - 1]
 
         # добваление музыки
-        pygame.mixer.music.load('additional_functions/data/sounds/main_s.mp3')
+        pygame.mixer.music.load('../../program_code/checkers/additional_functions/data/sounds/main_s.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1, 0, 10)
 
         sounds = {}
-        click = pygame.mixer.Sound('additional_functions/data/sounds/click.wav')
-        find_sound = pygame.mixer.Sound('additional_functions/data/sounds/find.wav')
-        move = pygame.mixer.Sound('additional_functions/data/sounds/move.wav')
+        click = pygame.mixer.Sound('../../program_code/checkers/additional_functions/data/sounds/click.wav')
+        find_sound = pygame.mixer.Sound('../../program_code/checkers/additional_functions/data/sounds/find.wav')
+        move = pygame.mixer.Sound('../../program_code/checkers/additional_functions/data/sounds/move.wav')
 
         sounds['click'] = click
         sounds['find'] = find_sound
