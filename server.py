@@ -6,9 +6,9 @@ from additional_functions.server.online_game import OnlineGame
 
 host = socket.gethostbyname(socket.gethostname())
 server = host
-print(host)
 port = 6668
 
+#
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
@@ -29,6 +29,8 @@ COLOR = WHITE
 
 
 class ThreadMain(Thread):
+    """Основной класс потока"""
+
     def __init__(self, conn, p, gameId):
         super().__init__()
         self.daemon = True
@@ -53,7 +55,7 @@ class ThreadMain(Thread):
                             idCount += 1
                         break
                     else:
-
+                        # обработка всех событий
                         if game.end and not game.winner:
                             del games[self.gameId]
                             reply = 'end'.encode()
@@ -115,6 +117,7 @@ class ThreadMain(Thread):
 
 
 while True:
+    # ожидание подключения пользователей
     conn, addr = s.accept()
     print('Connected to:', addr)
 
