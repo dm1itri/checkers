@@ -1,6 +1,8 @@
 import pygame
 from additional_functions.load_image import load_image
 from sqlite3 import connect
+from math import modf
+
 
 WHITE = 'white'
 BLACK = 'black'
@@ -9,23 +11,16 @@ MY_COLOR = WHITE
 main_font = 'additional_functions/fonts/main.ttf'
 COUNT_WHITE_KILLED = 0
 COUNT_BLACK_KILLED = 0
-
-
-# def load_board(filename):
-#     filename = "data/" + filename
-#     # читаем уровень, убирая символы перевода строки
-#     try:
-#         with open(filename, 'r') as mapFile:
-#             level_map = [line.strip() for line in mapFile]
-#     except FileNotFoundError:
-#         print(f'Файл {filename} не найден')
-#         return False
-#     # и подсчитываем максимальную длину
-#     max_width = max(map(len, level_map))
-#
-#     # дополняем каждую строку пустыми клетками ('.')
-#     maps = list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
-#     return maps
+COLOR_STYLE = {'background': ['#654321', '#03011a', '#368613'],
+               "line-around": ['#ac9362', '#8c80ff', '#ac9362'],
+               'line-text': ['#000000', '#e6ff05', '#ffffff'],
+               'cell-white': ['#f5f5dc', '#c4d904', '#f5f5dc'],
+               'cell-black': ['#964b00', '#1a04d9', '#964b00'],
+               'motion-text': ['#ffffff', '#e6ff05', '#ffffff'],
+               'cell-selected': ['#361b00', '#060133', 'blue'],
+               'cell-move': ['#e6e6a1', '#e6ff05', 'green']}
+with open('additional_functions/data/settings.txt') as f:
+    CURRENT_COLOR = int(f.read().split()[-1])
 
 
 def color_opponent():
@@ -34,7 +29,8 @@ def color_opponent():
     return BLACK
 
 
-def check_wqueen(board):  # проверка есть ли белые шашки расположенные на линии дамок
+def check_wqueen(board):
+    """Проверка на белые дамки"""
     sp = []
     for i in range(1, 8, 2):
         b = board[0][i]
@@ -45,6 +41,7 @@ def check_wqueen(board):  # проверка есть ли белые шашки
 
 
 def check_bqueen(board):
+    """Проверка на черные дамки"""
     sp = []
     for i in range(0, 7, 2):
         b = board[7][i]
@@ -55,6 +52,7 @@ def check_bqueen(board):
 
 
 class Shapes(pygame.sprite.Sprite):
+    """Общий класс фигур"""
 
     def __init__(self, group, color, size):
         super().__init__(group)
@@ -70,28 +68,9 @@ class Shapes(pygame.sprite.Sprite):
         all_sprites.remove(self)
 
 
-# class GameOver(pygame.sprite.Sprite):
-#     image = load_image("gameover.png")
-#
-#     def __init__(self, group):
-#         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite.
-#         # Это очень важно !!!
-#         super().__init__(group)
-#         self.image = GameOver.image
-#         self.rect = self.image.get_rect()
-#         self.width = self.rect.width
-#         self.rect.x = -self.width
-#         self.rect.y = 0
-#         self.right = True
-#
-#     def update(self, *args):
-#         if self.rect.x == 0:
-#             self.right = False
-#         if self.right:
-#             self.rect.x += 1
-
-
 class Queen(Shapes):
+    """Дамка"""
+
     def __init__(self, group, color, size):
         super().__init__(group, color, size)
         self.image = load_image("white_queen.png" if color == WHITE else "black_queen.png")
@@ -125,6 +104,8 @@ class Queen(Shapes):
 
 
 class Usual(Shapes):
+    """Пешка"""
+
     def can_move(self, board, x, y, pos_att, mine, offline=False):
         if (pos_att[0][0] == x + 1 or pos_att[0][0] == x - 1) and pos_att[0][1] == y + 1\
                 and len(pos_att) == 1 and self.color == BLACK:
@@ -157,6 +138,8 @@ class Usual(Shapes):
 
 
 class Board:
+    """Игровое поле"""
+
     # создание поля
     def __init__(self, width, height, offline=False):
         self.width = width
@@ -166,7 +149,7 @@ class Board:
 
         with open('additional_functions/data/settings.txt') as f:
             f = f.read()
-            self.left, self.top, self.cell_size, self.illumination, self.animation_ = [int(i) for i in f.split()]
+            self.left, self.top, self.cell_size, self.illumination, self.animation_ = [int(i) for i in f.split()[:-1]]
 
         self.field[0][1] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
         self.field[0][3] = Usual(all_sprites, BLACK, size=(self.cell_size, self.cell_size))
@@ -194,50 +177,44 @@ class Board:
         self.field[7][6] = Usual(all_sprites, WHITE, size=(self.cell_size, self.cell_size))
         self.mouse_coords = []
 
-    # настройка внешнего вида  (пока не тестировалось)
-    # def set_view(self, left, top, cell_size):
-    #     self.left = left
-    #     self.top = top
-    #     self.cell_size = cell_size
-
     def render(self, screen, my_color, network, sounds):
         self.my_color = my_color
         self.network = network
         self.sounds = sounds
 
-        screen.fill('#368613')  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
-        screen.fill('#ac9362', (
+        screen.fill(COLOR_STYLE['background'][CURRENT_COLOR])  # если не нравится, то меняй, я не уверен в этом цвете (была просто черная заливка)
+        screen.fill(COLOR_STYLE['line-around'][CURRENT_COLOR], (
             self.left - 20, self.top - 20, self.cell_size * self.width + 40, self.cell_size * self.height + 40))
 
         font = pygame.font.Font(main_font, 35)
-        text = font.render(f"{'Ваш ход' if COLOR == WHITE else 'Ход противника'}", True, (255, 255, 255))
+        text = font.render(f"{'Ваш ход' if COLOR == WHITE else 'Ход противника'}", True, COLOR_STYLE['motion-text'][CURRENT_COLOR])
         screen.blit(text, (self.left, self.top - 80))
 
-        text = font.render(f"{COUNT_BLACK_KILLED}", True, (255, 255, 255))
+        text = font.render(f"{COUNT_BLACK_KILLED}", True, COLOR_STYLE['cell-white'][CURRENT_COLOR])
         screen.blit(text, (self.left + 0.5 * self.cell_size * self.width - text.get_width() - 5,
                            self.top + self.cell_size * self.height + 20))
-        text = font.render(":", True, '#964b00')
+        text = font.render(":", True, COLOR_STYLE['line-around'][CURRENT_COLOR])
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width - 1, self.top + self.cell_size * self.height + 20))
-        text = font.render(f"{COUNT_WHITE_KILLED}", True, (0, 0, 0))
+        text = font.render(f"{COUNT_WHITE_KILLED}", True, COLOR_STYLE['cell-black'][CURRENT_COLOR])
         screen.blit(text,
                     (self.left + 0.5 * self.cell_size * self.width + 10, self.top + self.cell_size * self.height + 20))
         font = pygame.font.Font(main_font, 17)
         for i in range(1, 9):
-            text = font.render(str(i), True, (0, 0, 0))
+            text = font.render(str(i), True, COLOR_STYLE['line-text'][CURRENT_COLOR])
             screen.blit(text, (self.left - 15, self.top + self.cell_size * (i - 0.5)))
             screen.blit(text, (self.left + self.cell_size * self.width + 5, self.top + self.cell_size * (i - 0.5)))
-            text = font.render('ABCDEFGH'[i - 1], True, (0, 0, 0))
+            text = font.render('ABCDEFGH'[i - 1], True, COLOR_STYLE['line-text'][CURRENT_COLOR])
             screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top - 20))
             screen.blit(text, (self.left + self.cell_size * (i - 0.5), self.top + self.cell_size * self.height))
 
         for i in range(self.height):
             for j in range(self.width):
                 if i % 2:
-                    color = '#f5f5dc' if j % 2 else '#964b00'
+                    color = COLOR_STYLE['cell-white'][CURRENT_COLOR] if j % 2 else COLOR_STYLE['cell-black'][CURRENT_COLOR]
                 else:
-                    color = '#f5f5dc' if j % 2 == 0 else '#964b00'
-                screen.fill(pygame.Color(color),
+                    color = COLOR_STYLE['cell-white'][CURRENT_COLOR] if j % 2 == 0 else COLOR_STYLE['cell-black'][CURRENT_COLOR]
+                screen.fill(color,
                             (self.left + self.cell_size * j, self.top + self.cell_size * i, self.cell_size,
                              self.cell_size), 0)
                 if self.field[i][j]:
@@ -250,14 +227,14 @@ class Board:
             if self.field[y][x]:
                 if (self.field[y][x].color == WHITE and not self.offline) or (
                         self.field[y][x].color == COLOR and self.offline):
-                    screen.fill('blue', (
+                    screen.fill(COLOR_STYLE['cell-selected'][CURRENT_COLOR], (
                         self.left + self.cell_size * x, self.top + self.cell_size * y, self.cell_size, self.cell_size))
 
                     if self.illumination:
                         for i in range(self.height):
                             for j in range(self.width):
                                 if self.field[y][x].can_move(self.field, x, y, ([j, i],), True, offline=self.offline):
-                                    screen.fill('green',
+                                    screen.fill(COLOR_STYLE['cell-move'][CURRENT_COLOR],
                                                 (self.left + self.cell_size * j, self.top + self.cell_size * i,
                                                  self.cell_size, self.cell_size))
 
@@ -349,37 +326,24 @@ class Board:
                                         return False
         return True
 
-    def check_can_move(self):
-        for i in range(8):
-            for j in range(8):
-                checker = self.field[j][i]
-                if checker:
-                    if (checker.color == color_opponent() and not self.offline) or (
-                            checker.color == color_opponent() and self.offline):
-                        for i1 in range(8):
-                            for j1 in range(8):
-                                rez = checker.can_move(self.field, i, j, [(j1, i1)], False, offline=self.offline)
-                                if type(rez) == list:
-                                    if len(rez) == 1:
-                                        return False
-                                elif rez:
-                                    return False
-        return True
-
     def animation(self, checker, x, y, x1, y1):
-        '''Анимация перемещения шашек'''
+        """Анимация перемещения шашек"""
         if self.sounds['on_sounds']:
             self.sounds['move'].play(0)
 
         delta_x = (x1 - x) * 0.1 * self.cell_size
         delta_y = (y1 - y) * 0.1 * self.cell_size
+
         for i in range(10):
-            checker.rect.x += delta_x
-            checker.rect.y += delta_y
+            checker.rect.x += delta_x + -modf(delta_x)[0]
+            checker.rect.y += delta_y + -modf(delta_y)[0]
+
             self.render(screen, self.my_color, self.network, self.sounds)
             all_sprites.draw(screen)
             pygame.display.flip()
             clock.tick(50)
+        checker.rect.x += delta_x + -modf(delta_x)[0]
+        checker.rect.y += delta_y + -modf(delta_y)[0]
 
     def bot_move(self):
         """ИИ для бота"""
@@ -424,9 +388,10 @@ class Board:
 
 
 def load_move(data):
+    """Декодирование хода"""
+
     if data == 'None':
         return False
-    print(f'{data} = data')
 
     data = data.split('%')
     last = int(data[0]), int(data[1])
@@ -436,6 +401,8 @@ def load_move(data):
 
 
 def send_move(last, new):
+    """Кодирование хода"""
+
     new = '%'.join('%'.join([str(i[0]), str(i[1])]) for i in new)
     return '%'.join([str(last[0]), str(last[1]), new])
 
@@ -461,7 +428,7 @@ def online_run(network, MY_COLOR, color, sounds):
         flag_quit = False
 
         pygame.init()
-        conn = connect('additional_functions/data/profile.sqlite')
+        conn = connect('additional_functions/data/database/profile.sqlite')
         with conn:  # Начатые матчи
             conn.cursor().execute('UPDATE statistics_matches set count = count + 1')
             conn.commit()
@@ -496,7 +463,6 @@ def online_run(network, MY_COLOR, color, sounds):
                             print('да')
                             if board.get_cell(event.pos) is not None:
                                 board.mouse_coords.append(board.get_cell(event.pos))
-            print(COLOR)
             count_fps += 1
             if count_fps % 100 == 0:
                 data = network.send('get_move')
@@ -511,7 +477,7 @@ def online_run(network, MY_COLOR, color, sounds):
 
                                 board.move(last[0], last[1], new, False)
                                 COLOR = color_opponent()
-            flag_winner1 = board.check_can_move()
+
             flag_winner = winner(MY_COLOR)
             if flag_winner is not None:
                 with conn:  # кол-во выигранных матчей
@@ -565,7 +531,6 @@ def offline_run(sounds):
     pygame.display.flip()
     running = True
     while running:
-        print(COLOR)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -591,8 +556,6 @@ def offline_run(sounds):
 
 
 def winner(MY_COLOR):
-    if board.check_can_move():
-        return True if COLOR == WHITE else False
     if COUNT_BLACK_KILLED == 12:
         return True
     if COUNT_WHITE_KILLED == 12:
